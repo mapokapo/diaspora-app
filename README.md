@@ -76,14 +76,14 @@ Project Link: [https://github.com/mapokapo/diaspora-app](https://github.com/mapo
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 
-[contributors-shield]: https://img.shields.io/github/contributors/mapokapo/repo.svg?style=for-the-badge
-[contributors-url]: https://github.com/mapokapo/repo/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/mapokapo/repo.svg?style=for-the-badge
-[forks-url]: https://github.com/mapokapo/repo/network/members
-[stars-shield]: https://img.shields.io/github/stars/mapokapo/repo.svg?style=for-the-badge
-[stars-url]: https://github.com/mapokapo/repo/stargazers
-[issues-shield]: https://img.shields.io/github/issues/mapokapo/repo.svg?style=for-the-badge
-[issues-url]: https://github.com/mapokapo/repo/issues
+[contributors-shield]: https://img.shields.io/github/contributors/mapokapo/diaspora-app.svg?style=for-the-badge
+[contributors-url]: https://github.com/mapokapo/diaspora-app/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/mapokapo/diaspora-app.svg?style=for-the-badge
+[forks-url]: https://github.com/mapokapo/diaspora-app/network/members
+[stars-shield]: https://img.shields.io/github/stars/mapokapo/diaspora-app.svg?style=for-the-badge
+[stars-url]: https://github.com/mapokapo/diaspora-app/stargazers
+[issues-shield]: https://img.shields.io/github/issues/mapokapo/diaspora-app.svg?style=for-the-badge
+[issues-url]: https://github.com/mapokapo/diaspora-app/issues
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/leo-petrović-7047b1162
 [product-screenshot]: https://github.com/mapokapo/diaspora-app/blob/master/screenshots/screenshot1.png
