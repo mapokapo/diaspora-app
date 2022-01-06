@@ -1,0 +1,6 @@
+{
+  "@@locale": "hr",
+  "appName": "Diaspora",
+  "log": "{inOut, select, in{Prijavi}, out{Odjavi}} se",
+  "systemDefault": "Zadano"
+}

@@ -1,0 +1,22 @@
+{
+  "@@locale": "en",
+  "appName": "Diaspora",
+  "@appName": {
+    "description": "The app name."
+  },
+  "log": "Log {inOut, select, in{in}, out{out}}",
+  "@log": {
+    "description": "Login/out string.",
+    "placeholders": {
+      "inOut": {
+        "type": "String",
+        "example": "Log in",
+        "description": "Log in or out action."
+      }
+    }
+  },
+  "systemDefault": "System default",
+  "@systemDefault": {
+    "description": "System default string for language etc."
+  }
+}
