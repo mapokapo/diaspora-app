@@ -15,8 +15,197 @@
       }
     }
   },
+  "register": "Register",
+  "@register": {
+    "description": "Register string."
+  },
+  "forgotPassword": "Forgot password?",
+  "@forgotPassword": {
+    "description": "Forgot password question string."
+  },
+  "emailAlreadyInUse": "That email is already in use.",
+  "@emailAlreadyInUse": {
+    "description": "Email already in use string."
+  },
+  "weakPassword": "Password too weak.",
+  "@weakPassword": {
+    "description": "Password too weak string."
+  },
+  "operationNotAllowed": "Internal error.",
+  "@operationNotAllowed": {
+    "description": "Internal error string."
+  },
+  "userDisabled": "That user account is disabled.",
+  "@userDisabled": {
+    "description": "User account disabled string."
+  },
+  "userNotFound": "User not found.",
+  "@userNotFound": {
+    "description": "User not found string."
+  },
+  "wrongPassword": "Wrong password.",
+  "@wrongPassword": {
+    "description": "Wrong password string."
+  },
+  "accountExistsWithDifferentCredential": "Internal issue with account.",
+  "@accountExistsWithDifferentCredential": {
+    "description": "Internal issue with account string."
+  },
+  "invalidCredential": "Internal credentials issue.",
+  "@invalidCredential": {
+    "description": "Internal credentials issue string."
+  },
+  "missingAndroidPkgName": "Internal app issue.",
+  "@missingAndroidPkgName": {
+    "description": "Internal app issue string."
+  },
+  "missingContinueUri": "Internal mail URI issue.",
+  "@missingContinueUri": {
+    "description": "Internal mail URI issue string."
+  },
+  "invalidContinueUri": "Invalid internal mail URI.",
+  "@invalidContinueUri": {
+    "description": "Invalid internal mail URI string."
+  },
+  "unauthorizedContinueUri": "Unauthorized internal mail URI.",
+  "@unauthorizedContinueUri": {
+    "description": "Unauthorized internal mail URI string."
+  },
+  "name": "Name",
+  "@name": {
+    "description": "Name string."
+  },
+  "email": "Email",
+  "@email": {
+    "description": "Email string."
+  },
+  "password": "Password",
+  "@password": {
+    "description": "Password string."
+  },
+  "content": "Content",
+  "@content": {
+    "description": "Content string."
+  },
+  "fieldRequiredYour": "You must enter your {fieldName, select, email{email}, name{name}, password{password}}.",
+  "@fieldRequiredYour": {
+    "description": "Login field requirement error string with your.",
+    "placeholders": {
+      "fieldName": {
+        "type": "String",
+        "example": "You must enter your email.",
+        "description": "The field that is missing."
+      }
+    }
+  },
+  "fieldRequired": "You must write {fieldName, select, email{an email}, name{a name}, password{a password}, content{some content}}.",
+  "@fieldRequired": {
+    "description": "Login field requirement error string.",
+    "placeholders": {
+      "fieldName": {
+        "type": "String",
+        "example": "You must enter an email.",
+        "description": "The field that is missing."
+      }
+    }
+  },
+  "fieldInvalid": "Invalid {fieldName, select, email{email}, name{name}, password{password}}.",
+  "@fieldInvalid": {
+    "description": "Form field invalid error string.",
+    "placeholders": {
+      "fieldName": {
+        "type": "String",
+        "example": "Invalid email.",
+        "description": "The field that is invalid."
+      }
+    }
+  },
+  "passwordLengthError": "Password must contain at least 6 characters.",
+  "@passwordLengthError": {
+    "description": "Password length error string."
+  },
+  "submit": "Submit",
+  "@submit": {
+    "description": "Submit string."
+  },
+  "hasAccount": "Already have an account?",
+  "@hasAccount": {
+    "description": "User already has account question string."
+  },
+  "hasNoAccount": "Don't have an account?",
+  "@hasNoAccount": {
+    "description": "User doesn't have an account question string."
+  },
+  "loginHelpText1": "You might be experiencing problems due to a couple of reasons, including but not limited to:",
+  "@loginHelpText1": {
+    "description": "Login help page first text section."
+  },
+  "loginHelpPoint1": "Technical difficulties with our services.",
+  "@loginHelpPoint1": {
+    "description": "Login help page first text point."
+  },
+  "loginHelpPoint2": "Technical difficulties with 3rd party services (Google).",
+  "@loginHelpPoint2": {
+    "description": "Login help page second text point."
+  },
+  "loginHelpPoint3": "Incorrect login service configuration.",
+  "@loginHelpPoint3": {
+    "description": "Login help page third text point."
+  },
+  "loginHelpPoint4": "Invalid login information.",
+  "@loginHelpPoint4": {
+    "description": "Login help page fourth text point."
+  },
+  "loginHelpText2": "If you are unable to use the app due to any of these reasons, please use our support contact form below.",
+  "@loginHelpText2": {
+    "description": "Login help page second text section."
+  },
+  "loginToAgree": "By tapping log in, you agree with our",
+  "@loginToAgree": {
+    "description": "Tapping login to agree with ToS string."
+  },
+  "termsOfService": "Terms of Service",
+  "@termsOfService": {
+    "description": "Terms of service string."
+  },
+  "and": "and",
+  "@and": {
+    "description": "Lowercase and string."
+  },
+  "privacyPolicy": "Privacy Policy",
+  "@privacyPolicy": {
+    "description": "Privacy policy string."
+  },
+  "loginEmail": "Log in with email",
+  "@loginEmail": {
+    "description": "Log in with email string."
+  },
+  "loginGoogle": "Log in with Google",
+  "@loginGoogle": {
+    "description": "Log in with Google string."
+  },
+  "loginTrouble": "Trouble logging in?",
+  "@loginTrouble": {
+    "description": "Login diffculties question string."
+  },
+  "forgotPasswordText1": "In case you forgot your password, you can request a password reset using the form below.",
+  "@forgotPasswordText1": {
+    "description": "Password reset help string."
+  },
   "systemDefault": "System default",
   "@systemDefault": {
     "description": "System default string for language etc."
+  },
+  "swipe": "Swipe",
+  "@swipe": {
+    "description": "Swipe string."
+  },
+  "matches": "Matches",
+  "@matches": {
+    "description": "Matches string."
+  },
+  "settings": "Settings",
+  "@settings": {
+    "description": "Settings string."
   }
 }

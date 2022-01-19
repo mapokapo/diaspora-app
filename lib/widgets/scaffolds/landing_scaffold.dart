@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:vrouter/vrouter.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class LandingScaffold extends StatelessWidget {
   final Widget body;
@@ -12,6 +13,9 @@ class LandingScaffold extends StatelessWidget {
       child: Scaffold(
         appBar: context.vRouter.historyCanBack()
             ? AppBar(
+                title: Text(context.vRouter.path == "/"
+                    ? ""
+                    : AppLocalizations.of(context)!.appName),
                 leading: BackButton(
                   onPressed: () => context.vRouter.systemPop(),
                 ),

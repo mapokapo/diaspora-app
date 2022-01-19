@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "154558251344",
+    "firebase_url": "https://diaspora-app-9ffb9-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "diaspora-app-9ffb9",
+    "storage_bucket": "diaspora-app-9ffb9.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:154558251344:android:9786690289de60cd03ec55",
+        "android_client_info": {
+          "package_name": "me.mapokapo.diaspora_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "154558251344-g295qqvt3fjnci87ppf293rp07njbc3q.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "me.mapokapo.diaspora_app",
+            "certificate_hash": "94dc1e9e719c519a970af8d60b6d49333b02d2b6"
+          }
+        },
+        {
+          "client_id": "154558251344-g4o1m0jcf8968sr5ih3rf179edathfa1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDdJFGsuTVQJM-rsCgdlBnqhFslH9APeJA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "154558251344-g4o1m0jcf8968sr5ih3rf179edathfa1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

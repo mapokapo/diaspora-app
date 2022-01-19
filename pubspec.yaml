@@ -39,16 +39,21 @@ dependencies:
   cloud_firestore: ^3.1.5
   get_it: ^7.2.0
   shared_preferences: ^2.0.11
-  firebase_analytics: ^9.0.4
   firebase_auth: ^3.3.4
   firebase_storage: ^10.2.4
   provider: ^6.0.1
   vrouter: ^1.2.0
-  easy_localization: ^3.0.0
   intl: ^0.17.0
   flutter_form_builder: ^7.0.0
   form_builder_validators: ^7.2.0
+  image_picker: ^0.8.4+4
   flutter_keyboard_visibility: ^5.1.0
+  google_sign_in: ^5.2.3
+  firebase_database: ^9.0.5
+  flutter_email_sender: ^5.0.2
+  flutter_tindercard:
+    git:
+      url: https://github.com/ShaunRain/flutter_tindercard.git
 
 dev_dependencies:
   flutter_test:
@@ -71,8 +76,8 @@ flutter:
   # the material Icons class.
   uses-material-design: true
   assets:
-    - assets/translations/
     - assets/fonts/
+    - assets/images/
 
   fonts:
     - family: Source Sans Pro

@@ -1,12 +1,17 @@
 // ignore_for_file: prefer_const_constructors
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:diaspora_app/constants/routes.dart';
 import 'package:diaspora_app/constants/theme_data.dart';
 import 'package:diaspora_app/state/language_notifier.dart';
 import 'package:diaspora_app/state/theme_mode_notifier.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart';
+import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -21,6 +26,10 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  FirebaseAuth.instance.useAuthEmulator('10.0.2.2', 9099);
+  FirebaseFirestore.instance.useFirestoreEmulator('10.0.2.2', 4000);
+  FirebaseStorage.instance.useStorageEmulator('10.0.2.2', 9199);
+  FirebaseDatabase.instance.useDatabaseEmulator('10.0.2.2', 9000);
 
   final _sharedPreferences = await SharedPreferences.getInstance();
   final _storedLocale = _sharedPreferences.getString('locale');
@@ -57,7 +66,10 @@ class MyApp extends StatelessWidget {
           onSystemPop: (redirector) async {
             if (redirector.historyCanBack()) redirector.historyBack();
           },
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          localizationsDelegates: const [
+            ...AppLocalizations.localizationsDelegates,
+            FormBuilderLocalizations.delegate,
+          ],
           supportedLocales: AppLocalizations.supportedLocales,
           locale: Provider.of<LanguageNotifier>(context).locale,
           debugShowCheckedModeBanner: false,

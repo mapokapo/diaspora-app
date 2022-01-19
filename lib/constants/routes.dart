@@ -1,9 +1,15 @@
+import 'package:diaspora_app/widgets/pages/app/matches_page.dart';
+import 'package:diaspora_app/widgets/pages/app/profile_page.dart';
+import 'package:diaspora_app/widgets/pages/app/settings_page.dart';
+import 'package:diaspora_app/widgets/pages/app/swipe_page.dart';
+import 'package:diaspora_app/widgets/pages/guest/forgot_password_page.dart';
 import 'package:diaspora_app/widgets/pages/guest/landing_page.dart';
+import 'package:diaspora_app/widgets/pages/guest/login_help_page.dart';
 import 'package:diaspora_app/widgets/pages/guest/login_page.dart';
+import 'package:diaspora_app/widgets/pages/guest/register_page.dart';
 import 'package:diaspora_app/widgets/scaffolds/app_scaffold.dart';
 import 'package:diaspora_app/widgets/scaffolds/landing_scaffold.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
 import 'package:vrouter/vrouter.dart';
 
 class Routes {
@@ -39,6 +45,21 @@ class Routes {
                 path: "login",
                 widget: const LoginPage(),
               ),
+              // register page
+              VWidget(
+                path: "register",
+                widget: const RegisterPage(),
+              ),
+              // forgot password page
+              VWidget(
+                path: "forgot_password",
+                widget: const ForgotPasswordPage(),
+              ),
+              // login help page
+              VWidget(
+                path: "login_help",
+                widget: LoginHelpPage(),
+              ),
             ],
           ),
         ],
@@ -55,15 +76,25 @@ class Routes {
             path: '/app',
             widgetBuilder: (child) => AppScaffold(body: child),
             nestedRoutes: [
-              // home page
+              // swipe page (main page)
               VWidget(
                 path: null,
-                widget: const Placeholder(),
+                widget: const SwipePage(),
               ),
-              // settings page... etc.
+              // matches page
+              VWidget(
+                path: "matches",
+                widget: const MatchesPage(),
+              ),
+              // profile page
+              VWidget(
+                path: "profile",
+                widget: const ProfilePage(),
+              ),
+              // settings page
               VWidget(
                 path: "settings",
-                widget: const Placeholder(),
+                widget: const SettingsPage(),
               ),
             ],
           ),
