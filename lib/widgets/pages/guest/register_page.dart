@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:diaspora_app/constants/user_interests.dart';
 import 'package:diaspora_app/widgets/partials/auth_button.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -8,7 +10,6 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:path/path.dart' as path;
 import 'package:vrouter/vrouter.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -21,21 +22,34 @@ class RegisterPage extends StatefulWidget {
 
 class _RegisterPageState extends State<RegisterPage> {
   final GlobalKey<FormBuilderState> _formKey = GlobalKey<FormBuilderState>();
-  File? _image;
   bool _uploading = false;
   String? _error;
 
   Future<void> _handleRegister(
-      String name, String email, String password) async {
+    XFile? image,
+    String name,
+    String email,
+    String password,
+    DateTime dateOfBirth,
+    List<String> interests,
+  ) async {
     try {
       final user = (await FirebaseAuth.instance
               .createUserWithEmailAndPassword(email: email, password: password))
           .user!;
-      if (_image != null) {
-        final ref = FirebaseStorage.instance
-            .ref("profile_images")
-            .child(user.uid + path.extension(_image!.path));
-        UploadTask uploadTask = ref.putFile(_image!);
+      final firestore = FirebaseFirestore.instance;
+      final userRef = firestore.collection('users').doc(user.uid);
+      await userRef.set({
+        'name': name,
+        'dateOfBirth': dateOfBirth,
+        'interests': interests,
+        'matches': [],
+      });
+      if (image != null) {
+        final ref =
+            FirebaseStorage.instance.ref("profile_images").child(user.uid);
+        final imageFile = File(image.path);
+        UploadTask uploadTask = ref.putFile(imageFile);
         setState(() {
           _uploading = true;
         });
@@ -43,10 +57,10 @@ class _RegisterPageState extends State<RegisterPage> {
           setState(() {
             _uploading = false;
           });
-          context.vRouter.to("/app", isReplacement: true);
+          context.vRouter.to("/app", isReplacement: true, historyState: {});
         });
       } else {
-        context.vRouter.to("/app", isReplacement: true);
+        context.vRouter.to("/app", isReplacement: true, historyState: {});
       }
     } on FirebaseAuthException catch (e) {
       final code = e.code.split("/").last;
@@ -71,6 +85,11 @@ class _RegisterPageState extends State<RegisterPage> {
     }
   }
 
+  // TODO
+  // If user makes account with Google Sign-In, he needs to input extra info, so he is redirected to here
+  // Handle photoUrl (or allow custom photo to override Google photo), interests and DoB
+  // Remove email prompt, autopopulate name prompt with user displayName
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -94,16 +113,14 @@ class _RegisterPageState extends State<RegisterPage> {
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 12),
-                    FormBuilderField(
+                    FormBuilderField<XFile?>(
                       builder: (state) {
                         return InkWell(
                           onTap: () async {
                             final picker = ImagePicker();
                             final image = await picker.pickImage(
                                 source: ImageSource.gallery);
-                            setState(() {
-                              _image = image != null ? File(image.path) : null;
-                            });
+                            state.didChange(image);
                           },
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 96),
@@ -112,9 +129,10 @@ class _RegisterPageState extends State<RegisterPage> {
                               child: Container(
                                 decoration: BoxDecoration(
                                   color: Theme.of(context).colorScheme.primary,
-                                  image: _image != null
+                                  image: state.value != null
                                       ? DecorationImage(
-                                          image: FileImage(_image!),
+                                          image: FileImage(
+                                              File(state.value!.path)),
                                           fit: BoxFit.cover,
                                         )
                                       : const DecorationImage(
@@ -123,9 +141,10 @@ class _RegisterPageState extends State<RegisterPage> {
                                   borderRadius: const BorderRadius.all(
                                       Radius.circular(25)),
                                   border: Border.all(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .primaryVariant),
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .primaryVariant,
+                                  ),
                                 ),
                               ),
                             ),
@@ -146,11 +165,10 @@ class _RegisterPageState extends State<RegisterPage> {
                             .copyWith(color: Theme.of(context).errorColor),
                       ),
                     if (_error != null) const SizedBox(height: 8),
-                    // TODO
-                    // Proper focus shift on "enter" button pressed
                     FormBuilderTextField(
                       name: 'name',
                       keyboardType: TextInputType.name,
+                      textInputAction: TextInputAction.next,
                       decoration: InputDecoration(
                         labelText: AppLocalizations.of(context)!.name,
                         border: const OutlineInputBorder(
@@ -163,7 +181,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       validator: FormBuilderValidators.compose([
                         FormBuilderValidators.required(context,
                             errorText: AppLocalizations.of(context)!
-                                .fieldRequired('name')),
+                                .fieldRequiredYour('name')),
                         FormBuilderValidators.match(context, r'\w+( +\w+)*',
                             errorText: AppLocalizations.of(context)!
                                 .fieldInvalid('name')),
@@ -173,6 +191,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     FormBuilderTextField(
                       name: 'email',
                       keyboardType: TextInputType.emailAddress,
+                      textInputAction: TextInputAction.next,
                       decoration: InputDecoration(
                         labelText: AppLocalizations.of(context)!.email,
                         border: const OutlineInputBorder(
@@ -185,7 +204,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       validator: FormBuilderValidators.compose([
                         FormBuilderValidators.required(context,
                             errorText: AppLocalizations.of(context)!
-                                .fieldRequired('email')),
+                                .fieldRequiredYour('email')),
                         FormBuilderValidators.email(context,
                             errorText: AppLocalizations.of(context)!
                                 .fieldInvalid('email')),
@@ -195,6 +214,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     FormBuilderTextField(
                       name: 'password',
                       keyboardType: TextInputType.text,
+                      textInputAction: TextInputAction.next,
                       obscureText: true,
                       decoration: InputDecoration(
                         labelText: AppLocalizations.of(context)!.password,
@@ -214,6 +234,50 @@ class _RegisterPageState extends State<RegisterPage> {
                                 .passwordLengthError),
                       ]),
                     ),
+                    const SizedBox(height: 16),
+                    FormBuilderDateTimePicker(
+                      name: 'dateOfBirth',
+                      inputType: InputType.date,
+                      textInputAction: TextInputAction.next,
+                      decoration: InputDecoration(
+                        suffixIcon: const Icon(Icons.date_range),
+                        labelText: AppLocalizations.of(context)!.dateOfBirth,
+                        border: const OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: Colors.black,
+                            width: 4.0,
+                          ),
+                        ),
+                      ),
+                      validator: FormBuilderValidators.compose([
+                        FormBuilderValidators.required(context,
+                            errorText: AppLocalizations.of(context)!
+                                .fieldRequiredYour('dateOfBirth')),
+                      ]),
+                      timePickerInitialEntryMode: TimePickerEntryMode.input,
+                    ),
+                    const SizedBox(height: 16.0),
+                    FormBuilderCheckboxGroup<String>(
+                      focusNode: _formKey.currentState?.fields['interests']!
+                          .effectiveFocusNode,
+                      name: 'interests',
+                      decoration: InputDecoration(
+                        labelText: AppLocalizations.of(context)!.yourInterests,
+                        border: const OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: Colors.black,
+                            width: 4.0,
+                          ),
+                        ),
+                      ),
+                      options: [
+                        ...userInterests.map((e) {
+                          return FormBuilderFieldOption(
+                              value:
+                                  getUserInterestLocalizedString(context, e));
+                        }).toList(),
+                      ],
+                    ),
                     const SizedBox(height: 16.0),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -224,9 +288,13 @@ class _RegisterPageState extends State<RegisterPage> {
                               false) {
                             final values = _formKey.currentState!.value;
                             await _handleRegister(
-                                values['name'].toString().trim(),
-                                values['email'].toString().trim(),
-                                values['password'].toString().trim());
+                              values['image'],
+                              values['name'].toString().trim(),
+                              values['email'].toString().trim(),
+                              values['password'].toString().trim(),
+                              DateTime.parse(values['dateOfBirth'].toString()),
+                              values['interests'] as List<String>,
+                            );
                           }
                         },
                       ),

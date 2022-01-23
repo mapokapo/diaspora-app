@@ -3,6 +3,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:diaspora_app/constants/routes.dart';
 import 'package:diaspora_app/constants/theme_data.dart';
+import 'package:diaspora_app/state/current_match_notifier.dart';
 import 'package:diaspora_app/state/language_notifier.dart';
 import 'package:diaspora_app/state/theme_mode_notifier.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -26,6 +27,8 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  // TODO
+  // Remove in production
   FirebaseAuth.instance.useAuthEmulator('10.0.2.2', 9099);
   FirebaseFirestore.instance.useFirestoreEmulator('10.0.2.2', 4000);
   FirebaseStorage.instance.useStorageEmulator('10.0.2.2', 9199);
@@ -43,6 +46,9 @@ void main() async {
     ),
     ChangeNotifierProvider(
       create: (context) => ThemeModeNotifier(_storedThemeMode),
+    ),
+    ChangeNotifierProvider(
+      create: (context) => CurrentMatchNotifier(),
     ),
   ];
   runApp(MyApp(
@@ -65,6 +71,12 @@ class MyApp extends StatelessWidget {
         return VRouter(
           onSystemPop: (redirector) async {
             if (redirector.historyCanBack()) redirector.historyBack();
+          },
+          afterEnter: (context, from, to) {
+            if (from == "/app/matches/chat") {
+              Provider.of<CurrentMatchNotifier>(context, listen: false)
+                  .setMatch(null);
+            }
           },
           localizationsDelegates: const [
             ...AppLocalizations.localizationsDelegates,

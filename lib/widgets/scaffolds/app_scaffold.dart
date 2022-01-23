@@ -1,6 +1,9 @@
-import 'package:diaspora_app/widgets/partials/animated_gradient.dart';
+import 'package:diaspora_app/state/current_match_notifier.dart';
+import 'package:diaspora_app/widgets/partials/user_avatar.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
 import 'package:vrouter/vrouter.dart';
 
 class AppScaffold extends StatefulWidget {
@@ -13,13 +16,10 @@ class AppScaffold extends StatefulWidget {
 }
 
 class _AppScaffoldState extends State<AppScaffold> {
-  int _selectedIndex = 0;
-  final List<String> _routes = ["/app", "/app/matches", "/app/settings"];
+  final List<String> _routes = ["/app", "/app/matches", "/app/profile"];
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
     context.vRouter.to(_routes[index], isReplacement: true);
   }
 
@@ -27,41 +27,84 @@ class _AppScaffoldState extends State<AppScaffold> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
+        key: _scaffoldKey,
         drawerEnableOpenDragGesture: false,
         drawer: Drawer(
           child: Column(
-            children: const [Text("Hello")],
+            children: [
+              TextButton(
+                onPressed: () async {
+                  await FirebaseAuth.instance.signOut();
+                  context.vRouter.to(
+                    '/',
+                    historyState: {},
+                    isReplacement: true,
+                  );
+                },
+                child: Text(AppLocalizations.of(context)!.log('out')),
+              )
+            ],
           ),
         ),
-        appBar: AppBar(
-          title: Text(AppLocalizations.of(context)!.appName),
-          leading: Builder(builder: (context) {
-            return IconButton(
-              icon: const Icon(Icons.menu),
-              onPressed: () {
-                Scaffold.of(context).openDrawer();
-              },
-            );
-          }),
-        ),
-        bottomNavigationBar: BottomNavigationBar(
-          items: [
-            BottomNavigationBarItem(
-              icon: const Icon(Icons.search),
-              label: AppLocalizations.of(context)!.swipe,
-            ),
-            BottomNavigationBarItem(
-              icon: const Icon(Icons.favorite),
-              label: AppLocalizations.of(context)!.matches,
-            ),
-            BottomNavigationBarItem(
-              icon: const Icon(Icons.settings),
-              label: AppLocalizations.of(context)!.settings,
-            ),
-          ],
-          currentIndex: _selectedIndex,
-          onTap: _onItemTapped,
-        ),
+        appBar: Provider.of<CurrentMatchNotifier>(context).match == null
+            ? AppBar(
+                title: Text(AppLocalizations.of(context)!.appName),
+                leading: IconButton(
+                  icon: const Icon(Icons.menu),
+                  onPressed: () {
+                    _scaffoldKey.currentState!.openDrawer();
+                  },
+                ),
+              )
+            : AppBar(
+                title: Text(
+                    Provider.of<CurrentMatchNotifier>(context).match!.name),
+                leadingWidth: 80,
+                titleSpacing: 4,
+                leading: InkWell(
+                  onTap: () {
+                    context.vRouter.systemPop();
+                  },
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.chevron_left),
+                      UserAvatar(
+                          Provider.of<CurrentMatchNotifier>(context)
+                              .match!
+                              .imageData,
+                          mini: true),
+                    ],
+                  ),
+                ),
+              ),
+        bottomNavigationBar:
+            Provider.of<CurrentMatchNotifier>(context).match == null
+                ? BottomNavigationBar(
+                    items: [
+                      BottomNavigationBarItem(
+                        icon: const Icon(Icons.search),
+                        label: AppLocalizations.of(context)!.swipe,
+                      ),
+                      BottomNavigationBarItem(
+                        icon: const Icon(Icons.favorite),
+                        label: AppLocalizations.of(context)!.matches,
+                      ),
+                      BottomNavigationBarItem(
+                        icon: const Icon(Icons.person),
+                        label: AppLocalizations.of(context)!.profile,
+                      ),
+                    ],
+                    currentIndex: context.vRouter.path == "/app"
+                        ? 0
+                        : context.vRouter.path == "/app/matches"
+                            ? 1
+                            : context.vRouter.path == "/app/profile"
+                                ? 2
+                                : 0,
+                    onTap: _onItemTapped,
+                  )
+                : null,
         body: Stack(
           children: [
             widget.body,

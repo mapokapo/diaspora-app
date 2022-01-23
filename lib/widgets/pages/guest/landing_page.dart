@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:diaspora_app/state/language_notifier.dart';
 import 'package:diaspora_app/widgets/partials/auth_button.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -116,9 +117,25 @@ class LandingPage extends StatelessWidget {
                       idToken: googleAuth?.idToken,
                     );
                     try {
-                      await FirebaseAuth.instance
-                          .signInWithCredential(credential);
-                      context.vRouter.to('/app');
+                      final _user = (await FirebaseAuth.instance
+                              .signInWithCredential(credential))
+                          .user!;
+                      final _usersCollection =
+                          FirebaseFirestore.instance.collection('users');
+                      final _userExists = (await _usersCollection
+                              .where(FieldPath.documentId, isEqualTo: _user.uid)
+                              .get())
+                          .docs
+                          .first
+                          .exists;
+                      if (!_userExists) {
+                        context.vRouter.to('/register', queryParameters: {
+                          'name': _user.displayName!,
+                          'photoUrl': _user.photoURL!
+                        });
+                      } else {
+                        context.vRouter.to('/app', isReplacement: true);
+                      }
                     } on FirebaseAuthException catch (e) {
                       final code = e.code;
                       String? errStr;

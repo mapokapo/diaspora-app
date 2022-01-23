@@ -11,7 +11,7 @@ class LandingScaffold extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        appBar: context.vRouter.historyCanBack()
+        appBar: context.vRouter.historyCanBack() && context.vRouter.url != "/"
             ? AppBar(
                 title: Text(context.vRouter.path == "/"
                     ? ""

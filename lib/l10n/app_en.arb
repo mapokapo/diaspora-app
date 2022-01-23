@@ -87,7 +87,15 @@
   "@content": {
     "description": "Content string."
   },
-  "fieldRequiredYour": "You must enter your {fieldName, select, email{email}, name{name}, password{password}}.",
+  "dateOfBirth": "Date of Birth",
+  "@dateOfBirth": {
+    "description": "Date of Birth string."
+  },
+  "yourInterests": "Your interests",
+  "@yourInterests": {
+    "description": "Your interests string."
+  },
+  "fieldRequiredYour": "You must enter your {fieldName, select, email{email}, name{name}, password{password}, dateOfBirth{date of birth}}.",
   "@fieldRequiredYour": {
     "description": "Login field requirement error string with your.",
     "placeholders": {
@@ -109,7 +117,7 @@
       }
     }
   },
-  "fieldInvalid": "Invalid {fieldName, select, email{email}, name{name}, password{password}}.",
+  "fieldInvalid": "Invalid {fieldName, select, email{email}, name{name}, password{password}, dateOfBirth{date of birth}}.",
   "@fieldInvalid": {
     "description": "Form field invalid error string.",
     "placeholders": {
@@ -127,6 +135,10 @@
   "submit": "Submit",
   "@submit": {
     "description": "Submit string."
+  },
+  "next": "Next",
+  "@next": {
+    "description": "Next string."
   },
   "hasAccount": "Already have an account?",
   "@hasAccount": {
@@ -207,5 +219,57 @@
   "settings": "Settings",
   "@settings": {
     "description": "Settings string."
+  },
+  "noUsersFound": "No users found.",
+  "@noUsersFound": {
+    "description": "No users found string."
+  },
+  "interests": "Interests",
+  "@interests": {
+    "description": "Interests string."
+  },
+  "profile": "Profile",
+  "@profile": {
+    "description": "Profile string."
+  },
+  "gaming": "Gaming",
+  "@gaming": {
+    "description": "Gaming string."
+  },
+  "music": "Music",
+  "@music": {
+    "description": "Music string."
+  },
+  "beauty": "Beauty",
+  "@beauty": {
+    "description": "Beauty string."
+  },
+  "fashion": "Fashion",
+  "@fashion": {
+    "description": "Fashion string."
+  },
+  "animals": "Animals",
+  "@animals": {
+    "description": "Animals string."
+  },
+  "moviesTVShows": "Movies & TV Shows",
+  "@moviesTVShows": {
+    "description": "Movies & TV Shows string."
+  },
+  "fitness": "Fitness",
+  "@fitness": {
+    "description": "Fitness string."
+  },
+  "technology": "Technology",
+  "@technology": {
+    "description": "Technology string."
+  },
+  "sports": "Sports",
+  "@sports": {
+    "description": "Sports string."
+  },
+  "photography": "Photography",
+  "@photography": {
+    "description": "Photography string."
   }
 }

@@ -1,3 +1,4 @@
+import 'package:diaspora_app/widgets/pages/app/chat_page.dart';
 import 'package:diaspora_app/widgets/pages/app/matches_page.dart';
 import 'package:diaspora_app/widgets/pages/app/profile_page.dart';
 import 'package:diaspora_app/widgets/pages/app/settings_page.dart';
@@ -83,9 +84,15 @@ class Routes {
               ),
               // matches page
               VWidget(
-                path: "matches",
-                widget: const MatchesPage(),
-              ),
+                  path: "matches",
+                  widget: const MatchesPage(),
+                  stackedRoutes: [
+                    // matches/chat page
+                    VWidget(
+                      path: "chat",
+                      widget: const ChatPage(),
+                    ),
+                  ]),
               // profile page
               VWidget(
                 path: "profile",

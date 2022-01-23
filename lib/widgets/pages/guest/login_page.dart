@@ -24,7 +24,7 @@ class _LoginPageState extends State<LoginPage> {
         email: email,
         password: password,
       );
-      context.vRouter.to('/app', isReplacement: true);
+      context.vRouter.to('/app', isReplacement: true, historyState: {});
     } on FirebaseAuthException catch (e) {
       final code = e.code;
       String? errStr;
@@ -77,11 +77,10 @@ class _LoginPageState extends State<LoginPage> {
             key: _formKey,
             child: Column(
               children: [
-                // TODO
-                // Proper focus shift on "enter" button pressed
                 FormBuilderTextField(
                   name: 'email',
                   keyboardType: TextInputType.emailAddress,
+                  textInputAction: TextInputAction.next,
                   decoration: InputDecoration(
                     labelText: AppLocalizations.of(context)!.email,
                     border: const OutlineInputBorder(
@@ -94,7 +93,7 @@ class _LoginPageState extends State<LoginPage> {
                   validator: FormBuilderValidators.compose([
                     FormBuilderValidators.required(context,
                         errorText: AppLocalizations.of(context)!
-                            .fieldRequired('email')),
+                            .fieldRequiredYour('email')),
                     FormBuilderValidators.email(context,
                         errorText: AppLocalizations.of(context)!
                             .fieldInvalid('email')),
@@ -104,6 +103,13 @@ class _LoginPageState extends State<LoginPage> {
                 FormBuilderTextField(
                   name: 'password',
                   keyboardType: TextInputType.text,
+                  textInputAction: TextInputAction.done,
+                  onEditingComplete: () async {
+                    if (_formKey.currentState?.saveAndValidate() ?? false) {
+                      await _handleLogin(_formKey.currentState?.value['email'],
+                          _formKey.currentState?.value['password']);
+                    }
+                  },
                   obscureText: true,
                   decoration: InputDecoration(
                     labelText: AppLocalizations.of(context)!.password,
@@ -117,7 +123,7 @@ class _LoginPageState extends State<LoginPage> {
                   validator: FormBuilderValidators.compose([
                     FormBuilderValidators.required(context,
                         errorText: AppLocalizations.of(context)!
-                            .fieldRequired('password')),
+                            .fieldRequiredYour('password')),
                   ]),
                 ),
               ],
