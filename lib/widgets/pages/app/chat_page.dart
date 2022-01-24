@@ -3,6 +3,7 @@ import 'package:diaspora_app/constants/match.dart';
 import 'package:diaspora_app/constants/message.dart';
 import 'package:diaspora_app/state/current_match_notifier.dart';
 import 'package:diaspora_app/widgets/partials/chat_message.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
@@ -16,119 +17,178 @@ class ChatPage extends StatefulWidget {
 
 class _ChatPageState extends State<ChatPage> {
   late Match _match;
-  List<Message>? _messages;
-  bool _loading = false;
+  late Stream<QuerySnapshot<Map<String, dynamic>>> _messagesStream;
+  DocumentSnapshot<Map<String, dynamic>>? _currentUser;
   final TextEditingController _textController = TextEditingController();
 
-  Future<List<Message>> _getMessages() async {
+  Stream<QuerySnapshot<Map<String, dynamic>>> _getMessagesStream() {
     final _messagesRef = FirebaseFirestore.instance.collection('messages');
-    final _messages = (await _messagesRef
-            .where('senderId', isEqualTo: _match.id)
-            .orderBy('sentAt', descending: true)
-            .get())
-        .docs;
-    return _messages.map((e) => Message.from(e)).toList();
+    final _messagesStream = _messagesRef
+        .where('senderId',
+            whereIn: [_match.id, FirebaseAuth.instance.currentUser!.uid])
+        .orderBy('sentAt', descending: true)
+        .snapshots();
+    return _messagesStream;
   }
 
   @override
   void initState() {
     super.initState();
-    _loading = true;
     _match = Provider.of<CurrentMatchNotifier>(context, listen: false).match!;
-    _getMessages().then((value) {
+    _messagesStream = _getMessagesStream();
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .get()
+        .then((value) {
       setState(() {
-        _messages = value;
-        _loading = false;
+        _currentUser = value;
       });
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return _loading
-        ? const Center(child: CircularProgressIndicator())
-        : _messages!.isNotEmpty
-            ? Center(child: Text(AppLocalizations.of(context)!.noUsersFound))
-            : Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: _messages!.length,
-                      reverse: true,
-                      itemBuilder: (context, index) {
-                        return ChatMessage(
-                          senderName: _match.name,
-                          senderId: _messages![index].senderId,
-                          imageData: _match.imageData,
-                          text: _messages![index].text,
-                          sentAt: _messages![index].sentAt,
-                        );
-                      },
-                    ),
-                  ),
-                  Container(
-                    color: Theme.of(context).colorScheme.primary,
-                    child: Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 12),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: TextField(
-                                  controller: _textController,
-                                  keyboardType: TextInputType.text,
-                                  textInputAction: TextInputAction.go,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodyText2!
-                                      .copyWith(
-                                        color: Colors.white,
-                                      ),
-                                  decoration: InputDecoration(
-                                    fillColor: Theme.of(context)
-                                        .colorScheme
-                                        .primaryVariant,
-                                    filled: true,
-                                    hintText:
-                                        AppLocalizations.of(context)!.email,
-                                    hintStyle: Theme.of(context)
-                                        .textTheme
-                                        .bodyText2!
-                                        .copyWith(
-                                          color: Colors.grey.shade300,
-                                        ),
-                                    border: const OutlineInputBorder(
-                                      borderRadius:
-                                          BorderRadius.all(Radius.circular(25)),
-                                    ),
-                                    contentPadding: const EdgeInsets.symmetric(
-                                        horizontal: 12, vertical: 2),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              IconButton(
-                                onPressed: () {
-                                  debugPrint("Send");
-                                },
-                                icon: Icon(
-                                  Icons.send,
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .secondaryVariant,
-                                  size: 32,
+    return GestureDetector(
+      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+      behavior: HitTestBehavior.translucent,
+      child: _currentUser == null
+          ? const Center(child: CircularProgressIndicator())
+          : StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+              stream: _messagesStream,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else {
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Expanded(
+                        child: snapshot.hasData
+                            ? Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: ListView(
+                                  reverse: true,
+                                  children: [
+                                    ...snapshot.data!.docs
+                                        .asMap()
+                                        .map(
+                                          (i, e) {
+                                            final _message = Message.from(e);
+                                            return MapEntry(
+                                              i,
+                                              ChatMessage(
+                                                senderName: _message.senderId ==
+                                                        FirebaseAuth.instance
+                                                            .currentUser!.uid
+                                                    ? _currentUser!.get('name')
+                                                    : _match.name,
+                                                senderId: _message.senderId,
+                                                imageData: _match.imageData,
+                                                text: _message.text,
+                                                sentAt: _message.sentAt,
+                                                prevMessage: i + 1 >=
+                                                        snapshot
+                                                            .data!.docs.length
+                                                    ? null
+                                                    : Message.from(
+                                                        snapshot
+                                                            .data!.docs[i + 1],
+                                                      ),
+                                              ),
+                                            );
+                                          },
+                                        )
+                                        .values
+                                        .toList()
+                                  ],
                                 ),
                               )
-                            ],
-                          ),
+                            : Center(
+                                child: Text(
+                                    AppLocalizations.of(context)!.noMessages),
+                              ),
+                      ),
+                      Container(
+                        color: Theme.of(context).colorScheme.primary,
+                        child: Column(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 12),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: TextField(
+                                      controller: _textController,
+                                      keyboardType: TextInputType.text,
+                                      textInputAction: TextInputAction.go,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyText2!
+                                          .copyWith(
+                                            color: Colors.white,
+                                          ),
+                                      decoration: InputDecoration(
+                                        fillColor: Theme.of(context)
+                                            .colorScheme
+                                            .primaryVariant,
+                                        filled: true,
+                                        hintText: AppLocalizations.of(context)!
+                                            .typeMessage,
+                                        hintStyle: Theme.of(context)
+                                            .textTheme
+                                            .bodyText2!
+                                            .copyWith(
+                                              color: Colors.grey.shade300,
+                                            ),
+                                        border: const OutlineInputBorder(
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(25)),
+                                        ),
+                                        contentPadding:
+                                            const EdgeInsets.symmetric(
+                                                horizontal: 12, vertical: 2),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  IconButton(
+                                    onPressed: () async {
+                                      final _message =
+                                          _textController.text.trim();
+                                      if (_message.isNotEmpty) {
+                                        final _messagesCollection =
+                                            FirebaseFirestore.instance
+                                                .collection('messages');
+                                        await _messagesCollection.add({
+                                          'senderId': FirebaseAuth
+                                              .instance.currentUser!.uid,
+                                          'receiverId': _match.id,
+                                          'text': _message,
+                                          'sentAt': DateTime.now(),
+                                        });
+                                        _textController.clear();
+                                      }
+                                    },
+                                    icon: Icon(
+                                      Icons.send,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .secondaryVariant,
+                                      size: 32,
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                  ),
-                ],
-              );
+                      ),
+                    ],
+                  );
+                }
+              }),
+    );
   }
 }

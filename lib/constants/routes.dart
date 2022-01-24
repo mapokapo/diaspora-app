@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:diaspora_app/widgets/pages/app/chat_page.dart';
 import 'package:diaspora_app/widgets/pages/app/matches_page.dart';
 import 'package:diaspora_app/widgets/pages/app/profile_page.dart';
@@ -27,7 +28,12 @@ class Routes {
       // landing nest guard
       VGuard(
         beforeEnter: (vRedirector) async =>
-            FirebaseAuth.instance.currentUser != null
+            FirebaseAuth.instance.currentUser != null &&
+                    (await FirebaseFirestore.instance
+                            .collection('users')
+                            .doc(FirebaseAuth.instance.currentUser?.uid)
+                            .get())
+                        .exists
                 ? vRedirector.to('/app')
                 : null,
         stackedRoutes: [
@@ -68,7 +74,12 @@ class Routes {
       // app nest guard
       VGuard(
         beforeEnter: (vRedirector) async =>
-            FirebaseAuth.instance.currentUser != null
+            FirebaseAuth.instance.currentUser != null &&
+                    (await FirebaseFirestore.instance
+                            .collection('users')
+                            .doc(FirebaseAuth.instance.currentUser?.uid)
+                            .get())
+                        .exists
                 ? null
                 : vRedirector.to('/'),
         stackedRoutes: [

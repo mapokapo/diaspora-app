@@ -59,6 +59,8 @@
   "moviesTVShows": "Filmovi i Serije",
   "fitness": "Fitness",
   "technology": "Tehnologija",
-  "sports": "Sport",
-  "photography": "Fotografija"
+  "recreationalSports": "Sport",
+  "photography": "Fotografija",
+  "typeMessage": "Napišite poruku",
+  "noMessages": "Nema poruka."
 }

@@ -126,10 +126,10 @@ class LandingPage extends StatelessWidget {
                               .where(FieldPath.documentId, isEqualTo: _user.uid)
                               .get())
                           .docs
-                          .first
-                          .exists;
+                          .isNotEmpty;
                       if (!_userExists) {
                         context.vRouter.to('/register', queryParameters: {
+                          'uid': _user.uid,
                           'name': _user.displayName!,
                           'photoUrl': _user.photoURL!
                         });

@@ -36,6 +36,8 @@ List<IconData> interestsToIconData(List<String> interests) {
       case "photography":
         _iconData = Icons.camera_alt;
         break;
+      default:
+        throw Exception("Invalid icon " + _normalizedName);
     }
     _icons.add(_iconData);
   }

@@ -25,29 +25,30 @@ class _RegisterPageState extends State<RegisterPage> {
   bool _uploading = false;
   String? _error;
 
-  Future<void> _handleRegister(
-    XFile? image,
-    String name,
-    String email,
-    String password,
-    DateTime dateOfBirth,
-    List<String> interests,
-  ) async {
+  Future<void> _handleRegister(XFile? image, String name, String? email,
+      String? password, DateTime dateOfBirth, List<String> interests,
+      [String? uid, String? imageUrl]) async {
     try {
-      final user = (await FirebaseAuth.instance
-              .createUserWithEmailAndPassword(email: email, password: password))
-          .user!;
+      User? user;
+      if (email != null && password != null) {
+        user = (await FirebaseAuth.instance.createUserWithEmailAndPassword(
+                email: email, password: password))
+            .user!;
+      }
       final firestore = FirebaseFirestore.instance;
-      final userRef = firestore.collection('users').doc(user.uid);
+      final userRef =
+          firestore.collection('users').doc(user != null ? user.uid : uid!);
       await userRef.set({
         'name': name,
         'dateOfBirth': dateOfBirth,
         'interests': interests,
         'matches': [],
+        'imageUrl': image == null ? imageUrl : null,
       });
       if (image != null) {
-        final ref =
-            FirebaseStorage.instance.ref("profile_images").child(user.uid);
+        final ref = FirebaseStorage.instance
+            .ref("profile_images")
+            .child(user != null ? user.uid : uid!);
         final imageFile = File(image.path);
         UploadTask uploadTask = ref.putFile(imageFile);
         setState(() {
@@ -64,19 +65,25 @@ class _RegisterPageState extends State<RegisterPage> {
       }
     } on FirebaseAuthException catch (e) {
       final code = e.code.split("/").last;
-      String? errStr;
+      String? errStr, field;
       if (code == "email-already-in-use") {
         errStr = AppLocalizations.of(context)!.emailAlreadyInUse;
+        field = 'email';
       } else if (code == "invalid-email") {
         errStr = AppLocalizations.of(context)!.fieldInvalid("email");
+        field = 'email';
       } else if (code == "weak-password") {
         errStr = AppLocalizations.of(context)!.weakPassword;
+        field = 'password';
       } else if (code == "operation-not-allowed") {
         errStr = AppLocalizations.of(context)!.operationNotAllowed;
       }
-      if (errStr != null) {
-        _formKey.currentState!
-            .invalidateField(name: 'email', errorText: errStr);
+      if (errStr != null && field != null) {
+        _formKey.currentState!.invalidateField(name: field, errorText: errStr);
+      } else if (errStr != null && field == null) {
+        setState(() {
+          _error = errStr;
+        });
       } else {
         setState(() {
           _error = e.message;
@@ -84,11 +91,6 @@ class _RegisterPageState extends State<RegisterPage> {
       }
     }
   }
-
-  // TODO
-  // If user makes account with Google Sign-In, he needs to input extra info, so he is redirected to here
-  // Handle photoUrl (or allow custom photo to override Google photo), interests and DoB
-  // Remove email prompt, autopopulate name prompt with user displayName
 
   @override
   Widget build(BuildContext context) {
@@ -114,6 +116,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                     const SizedBox(height: 12),
                     FormBuilderField<XFile?>(
+                      initialValue: null,
                       builder: (state) {
                         return InkWell(
                           onTap: () async {
@@ -135,9 +138,18 @@ class _RegisterPageState extends State<RegisterPage> {
                                               File(state.value!.path)),
                                           fit: BoxFit.cover,
                                         )
-                                      : const DecorationImage(
-                                          image: AssetImage(
-                                              'assets/images/profile.png')),
+                                      : context.vRouter.queryParameters
+                                              .containsKey('photoUrl')
+                                          ? DecorationImage(
+                                              image: NetworkImage(context
+                                                      .vRouter.queryParameters[
+                                                  'photoUrl']!),
+                                              fit: BoxFit.cover,
+                                            )
+                                          : const DecorationImage(
+                                              image: AssetImage(
+                                                  'assets/images/profile.png'),
+                                            ),
                                   borderRadius: const BorderRadius.all(
                                       Radius.circular(25)),
                                   border: Border.all(
@@ -166,6 +178,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                     if (_error != null) const SizedBox(height: 8),
                     FormBuilderTextField(
+                      initialValue: context.vRouter.queryParameters['name'],
                       name: 'name',
                       keyboardType: TextInputType.name,
                       textInputAction: TextInputAction.next,
@@ -187,53 +200,57 @@ class _RegisterPageState extends State<RegisterPage> {
                                 .fieldInvalid('name')),
                       ]),
                     ),
-                    const SizedBox(height: 16.0),
-                    FormBuilderTextField(
-                      name: 'email',
-                      keyboardType: TextInputType.emailAddress,
-                      textInputAction: TextInputAction.next,
-                      decoration: InputDecoration(
-                        labelText: AppLocalizations.of(context)!.email,
-                        border: const OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Colors.black,
-                            width: 4.0,
+                    if (!context.vRouter.queryParameters.containsKey('name'))
+                      const SizedBox(height: 16.0),
+                    if (!context.vRouter.queryParameters.containsKey('name'))
+                      FormBuilderTextField(
+                        name: 'email',
+                        keyboardType: TextInputType.emailAddress,
+                        textInputAction: TextInputAction.next,
+                        decoration: InputDecoration(
+                          labelText: AppLocalizations.of(context)!.email,
+                          border: const OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: Colors.black,
+                              width: 4.0,
+                            ),
                           ),
                         ),
+                        validator: FormBuilderValidators.compose([
+                          FormBuilderValidators.required(context,
+                              errorText: AppLocalizations.of(context)!
+                                  .fieldRequiredYour('email')),
+                          FormBuilderValidators.email(context,
+                              errorText: AppLocalizations.of(context)!
+                                  .fieldInvalid('email')),
+                        ]),
                       ),
-                      validator: FormBuilderValidators.compose([
-                        FormBuilderValidators.required(context,
-                            errorText: AppLocalizations.of(context)!
-                                .fieldRequiredYour('email')),
-                        FormBuilderValidators.email(context,
-                            errorText: AppLocalizations.of(context)!
-                                .fieldInvalid('email')),
-                      ]),
-                    ),
-                    const SizedBox(height: 16.0),
-                    FormBuilderTextField(
-                      name: 'password',
-                      keyboardType: TextInputType.text,
-                      textInputAction: TextInputAction.next,
-                      obscureText: true,
-                      decoration: InputDecoration(
-                        labelText: AppLocalizations.of(context)!.password,
-                        border: const OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Colors.black,
-                            width: 4.0,
+                    if (!context.vRouter.queryParameters.containsKey('name'))
+                      const SizedBox(height: 16.0),
+                    if (!context.vRouter.queryParameters.containsKey('name'))
+                      FormBuilderTextField(
+                        name: 'password',
+                        keyboardType: TextInputType.text,
+                        textInputAction: TextInputAction.next,
+                        obscureText: true,
+                        decoration: InputDecoration(
+                          labelText: AppLocalizations.of(context)!.password,
+                          border: const OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: Colors.black,
+                              width: 4.0,
+                            ),
                           ),
                         ),
+                        validator: FormBuilderValidators.compose([
+                          FormBuilderValidators.required(context,
+                              errorText: AppLocalizations.of(context)!
+                                  .fieldRequired('password')),
+                          FormBuilderValidators.minLength(context, 6,
+                              errorText: AppLocalizations.of(context)!
+                                  .passwordLengthError),
+                        ]),
                       ),
-                      validator: FormBuilderValidators.compose([
-                        FormBuilderValidators.required(context,
-                            errorText: AppLocalizations.of(context)!
-                                .fieldRequired('password')),
-                        FormBuilderValidators.minLength(context, 6,
-                            errorText: AppLocalizations.of(context)!
-                                .passwordLengthError),
-                      ]),
-                    ),
                     const SizedBox(height: 16),
                     FormBuilderDateTimePicker(
                       name: 'dateOfBirth',
@@ -273,8 +290,10 @@ class _RegisterPageState extends State<RegisterPage> {
                       options: [
                         ...userInterests.map((e) {
                           return FormBuilderFieldOption(
-                              value:
-                                  getUserInterestLocalizedString(context, e));
+                              child: Text(
+                                getUserInterestLocalizedString(context, e),
+                              ),
+                              value: e.toLowerCase().replaceAll(" ", "_"));
                         }).toList(),
                       ],
                     ),
@@ -289,11 +308,13 @@ class _RegisterPageState extends State<RegisterPage> {
                             final values = _formKey.currentState!.value;
                             await _handleRegister(
                               values['image'],
-                              values['name'].toString().trim(),
-                              values['email'].toString().trim(),
-                              values['password'].toString().trim(),
+                              values['name'],
+                              values['email'],
+                              values['password'],
                               DateTime.parse(values['dateOfBirth'].toString()),
                               values['interests'] as List<String>,
+                              context.vRouter.queryParameters['uid'],
+                              context.vRouter.queryParameters['photoUrl'],
                             );
                           }
                         },

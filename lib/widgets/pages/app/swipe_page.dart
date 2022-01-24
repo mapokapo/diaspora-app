@@ -116,19 +116,20 @@ class _SwipePageState extends State<SwipePage> {
                             fit: StackFit.expand,
                             alignment: Alignment.center,
                             children: [
-                              Positioned(
-                                top: 0,
-                                bottom: 0,
-                                right: _matches![index].imageData == null
-                                    ? 0
-                                    : null,
-                                left: _matches![index].imageData == null
-                                    ? 0
-                                    : null,
-                                child: _matches![index].imageData != null
-                                    ? Image.memory(_matches![index].imageData!)
-                                    : Image.asset('assets/images/profile.png'),
-                              ),
+                              _matches![index].imageData != null
+                                  ? Padding(
+                                      padding: EdgeInsets.all(
+                                          _matches![index].googleUser
+                                              ? 48.0
+                                              : 0),
+                                      child: Image.memory(
+                                        _matches![index].imageData!,
+                                        fit: _matches![index].googleUser
+                                            ? BoxFit.contain
+                                            : BoxFit.fitHeight,
+                                      ),
+                                    )
+                                  : Image.asset('assets/images/profile.png'),
                               Align(
                                 alignment: Alignment.centerLeft,
                                 child: Padding(
@@ -163,6 +164,7 @@ class _SwipePageState extends State<SwipePage> {
                                         Theme.of(context)
                                             .colorScheme
                                             .primaryVariant,
+                                        Colors.transparent,
                                         Colors.transparent,
                                         Colors.transparent,
                                       ],

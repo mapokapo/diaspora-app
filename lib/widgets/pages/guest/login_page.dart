@@ -27,22 +27,28 @@ class _LoginPageState extends State<LoginPage> {
       context.vRouter.to('/app', isReplacement: true, historyState: {});
     } on FirebaseAuthException catch (e) {
       final code = e.code;
-      String? errStr;
+      String? errStr, field;
       if (code == "invalid-email") {
         errStr = AppLocalizations.of(context)!.fieldInvalid('email');
+        field = 'email';
       } else if (code == "user-disabled") {
         errStr = AppLocalizations.of(context)!.userDisabled;
       } else if (code == "user-not-found") {
         errStr = AppLocalizations.of(context)!.userNotFound;
       } else if (code == "wrong-password") {
         errStr = AppLocalizations.of(context)!.wrongPassword;
+        field = 'password';
       }
-      if (errStr != null) {
-        _formKey.currentState!
-            .invalidateField(name: 'email', errorText: errStr);
+
+      if (errStr != null && field != null) {
+        _formKey.currentState!.invalidateField(name: field, errorText: errStr);
+      } else if (errStr != null && field == null) {
+        setState(() {
+          _error = errStr;
+        });
       } else {
         setState(() {
-          _error = e.message!;
+          _error = e.message;
         });
       }
     }

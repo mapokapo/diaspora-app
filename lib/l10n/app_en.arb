@@ -264,12 +264,20 @@
   "@technology": {
     "description": "Technology string."
   },
-  "sports": "Sports",
-  "@sports": {
-    "description": "Sports string."
+  "recreationalSports": "Recreational Sports",
+  "@recreationalSports": {
+    "description": "Recreational Sports string."
   },
   "photography": "Photography",
   "@photography": {
     "description": "Photography string."
+  },
+  "typeMessage": "Type a message",
+  "@typeMessage": {
+    "description": "Type a message string."
+  },
+  "noMessages": "No messages.",
+  "@noMessages": {
+    "description": "No messages string."
   }
 }

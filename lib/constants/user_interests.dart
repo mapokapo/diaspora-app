@@ -43,7 +43,7 @@ String getUserInterestLocalizedString(BuildContext context, String interest) {
       _localizedString = AppLocalizations.of(context)!.technology;
       break;
     case "recreational_sports":
-      _localizedString = AppLocalizations.of(context)!.sports;
+      _localizedString = AppLocalizations.of(context)!.recreationalSports;
       break;
     case "photography":
       _localizedString = AppLocalizations.of(context)!.photography;

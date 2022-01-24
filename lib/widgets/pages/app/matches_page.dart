@@ -21,13 +21,27 @@ class _MatchesPageState extends State<MatchesPage> {
   bool _loading = false;
 
   Future<List<Match>> _getMatches() async {
+    final _messagesCollection =
+        FirebaseFirestore.instance.collection('messages');
     final _usersRef = FirebaseFirestore.instance.collection('users');
     final _currentUser =
         await _usersRef.doc(FirebaseAuth.instance.currentUser!.uid).get();
     final _matchedIds = List<String>.from(_currentUser.get('matches'));
+    final _sentMessages = await _messagesCollection
+        .where('senderId', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+        .get();
+    final _receivedMessages = await _messagesCollection
+        .where('receiverId', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+        .get();
+    _matchedIds.addAll((_sentMessages.docs..addAll(_receivedMessages.docs)).map(
+        (e) => e.get('senderId') == FirebaseAuth.instance.currentUser!.uid
+            ? e.get('receiverId')
+            : e.get('senderId')));
     List<QueryDocumentSnapshot<Map<String, dynamic>>> _matchedQuerySnapshots =
         [];
     if (_matchedIds.isNotEmpty) {
+      // TODO
+      // if _matchedIds is > 10, crashes
       _matchedQuerySnapshots = (await _usersRef
               .where(FieldPath.documentId, whereIn: _matchedIds)
               .get())
