@@ -62,5 +62,19 @@
   "recreationalSports": "Sport",
   "photography": "Fotografija",
   "typeMessage": "Napišite poruku",
-  "noMessages": "Nema poruka."
+  "noMessages": "Nema poruka.",
+  "userMatched": "{yesno, select, yes{Povezali ste}, no{Niste povezali}} korisnika!",
+  "hasMatches": "{yesno, select, yes{Imate povezanih korisnika!}, no{Nemate povezanih korisnika.}}",
+  "profileImage": "Profilna slika",
+  "change": "Promjeni -",
+  "cancel": "Odustani",
+  "matchedUsers": "Povezan s{count, plural, zero{a nijednim korisnikom.}, one{a jednim korisnikom.} other{ {count} korisnika.}}",
+  "yearsOld": "{count, plural, zero{Manje od jedne godine star.}, one{Jednu godinu star.}, other{{count} godina star.}}",
+  "toggleTheme": "Promjeni temu",
+  "changeLanguage": "Promjeni jezik na {languageCode, select, en{Engleski}, hr{Hrvatski}}",
+  "deleteAccount": "Izriši račun",
+  "deleteAccountText": "Jeste li sigurni da želite izbrisati svoj račun? Sve povezane informacije će biti izgubljene.",
+  "confirm": "Potvrdi",
+  "requiresRecentLogin": "Molimo vas odjavite se pa se ponovno prijavite pa pokušajte ponovno.",
+  "error": "Nepoznata greška."
 }

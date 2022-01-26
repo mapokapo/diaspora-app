@@ -1,4 +1,6 @@
 import 'package:diaspora_app/state/current_match_notifier.dart';
+import 'package:diaspora_app/state/language_notifier.dart';
+import 'package:diaspora_app/state/theme_mode_notifier.dart';
 import 'package:diaspora_app/widgets/partials/user_avatar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -29,6 +31,8 @@ class _AppScaffoldState extends State<AppScaffold> {
       child: Scaffold(
         key: _scaffoldKey,
         drawerEnableOpenDragGesture: false,
+        resizeToAvoidBottomInset:
+            context.vRouter.url == "/app/profile" ? false : true,
         drawer: Drawer(
           child: Column(
             children: [
@@ -42,7 +46,32 @@ class _AppScaffoldState extends State<AppScaffold> {
                   );
                 },
                 child: Text(AppLocalizations.of(context)!.log('out')),
-              )
+              ),
+              TextButton(
+                onPressed: () async {
+                  Provider.of<ThemeModeNotifier>(context, listen: false)
+                      .toggleThemeMode();
+                },
+                child: Text(AppLocalizations.of(context)!.toggleTheme),
+              ),
+              TextButton(
+                onPressed: () async {
+                  final _currentLocale =
+                      Provider.of<LanguageNotifier>(context, listen: false)
+                          .locale;
+                  Provider.of<LanguageNotifier>(context, listen: false)
+                      .setLocale(_currentLocale.languageCode == "en"
+                          ? const Locale("hr")
+                          : const Locale("en"));
+                },
+                child: Text(AppLocalizations.of(context)!.changeLanguage(
+                    Provider.of<LanguageNotifier>(context, listen: false)
+                                .locale
+                                .languageCode ==
+                            "en"
+                        ? "hr"
+                        : "en")),
+              ),
             ],
           ),
         ),
@@ -108,8 +137,6 @@ class _AppScaffoldState extends State<AppScaffold> {
         body: Stack(
           children: [
             widget.body,
-            // TODO
-            // Add a cool background
           ],
         ),
       ),

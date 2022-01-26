@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/services.dart';
 
@@ -8,7 +9,7 @@ class Match {
   String id;
   Uint8List? imageData;
   bool googleUser;
-  bool isMatched;
+  bool matchedYou;
   String name;
   List<String> interests;
 
@@ -16,13 +17,22 @@ class Match {
     required this.id,
     required this.name,
     required this.interests,
-    this.isMatched = true,
+    this.matchedYou = true,
     this.imageData,
     this.googleUser = false,
   });
 
-  static Future<Match> from(
+  static Future<Match> fromDoc(
+      DocumentSnapshot<Map<String, dynamic>> snapshot) async {
+    return Match._from(snapshot);
+  }
+
+  static Future<Match> fromQuery(
       QueryDocumentSnapshot<Map<String, dynamic>> snapshot) async {
+    return Match._from(snapshot);
+  }
+
+  static Future<Match> _from(dynamic snapshot) async {
     final _imageExists =
         (await FirebaseStorage.instance.ref('profile_images').list())
             .items
@@ -41,12 +51,16 @@ class Match {
       _imageData = imageData.buffer.asUint8List();
       _googleUser = true;
     }
+    final _matches = List<String>.from(snapshot.get('matches'));
+    final _matchedYou =
+        _matches.contains(FirebaseAuth.instance.currentUser!.uid);
     return Match(
       id: snapshot.id,
       name: snapshot.get('name'),
       interests: List<String>.from(snapshot.get('interests')),
       imageData: _imageData,
       googleUser: _googleUser,
+      matchedYou: _matchedYou,
     );
   }
 }

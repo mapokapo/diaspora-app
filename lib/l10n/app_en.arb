@@ -279,5 +279,96 @@
   "noMessages": "No messages.",
   "@noMessages": {
     "description": "No messages string."
+  },
+  "userMatched": "You {yesno, select, yes{matched}, no{didn't match}} this user!",
+  "@userMatched": {
+    "description": "User matched another user boolean string.",
+    "placeholders": {
+      "yesno": {
+        "type": "String",
+        "example": "This user didn't match you!",
+        "description": "Boolean indicating whether the user matched you or not."
+      }
+    }
+  },
+  "hasMatches": "You {yesno, select, yes{have some matches!}, no{don't have any matches.}}",
+  "@hasMatches": {
+    "description": "User has matches boolean string.",
+    "placeholders": {
+      "yesno": {
+        "type": "String",
+        "example": "You have some matches!.",
+        "description": "Boolean indicating whether you have matches or not."
+      }
+    }
+  },
+  "profileImage": "Profile image",
+  "@profileImage": {
+    "description": "Profile image string."
+  },
+  "change": "Change",
+  "@change": {
+    "description": "Change string."
+  },
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Cancel string."
+  },
+  "matchedUsers": "Matched {count, plural, zero{no users.}, one{1 user.} other{{count} users.}}",
+  "@matchedUsers": {
+    "description": "Number of matched users string.",
+    "placeholders": {
+      "count": {
+        "type": "String",
+        "example": "Matched 1 user.",
+        "description": "Number of users matched."
+      }
+    }
+  },
+  "yearsOld": "{count, plural, zero{Less than a year old.}, one{One year old.}, other{{count} years old.}}",
+  "@yearsOld": {
+    "description": "User age string.",
+    "placeholders": {
+      "count": {
+        "type": "String",
+        "example": "20 years old.",
+        "description": "Age of user."
+      }
+    }
+  },
+  "toggleTheme": "Toggle theme",
+  "@toggleTheme": {
+    "description": "Toggle theme string."
+  },
+  "changeLanguage": "Change language to {languageCode, select, en{English}, hr{Croatian}}",
+  "@changeLanguage": {
+    "description": "Change language string.",
+    "placeholders": {
+      "languageCode": {
+        "type": "String",
+        "example": "Change language to Croatian.",
+        "description": "The language to change to."
+      }
+    }
+  },
+  "deleteAccount": "Delete account",
+  "@deleteAccount": {
+    "description": "Delete account string."
+  },
+  "deleteAccountText": "Are you sure you want to delete your account? All associated data will be lost.",
+  "@deleteAccountText": {
+    "description": "Account deletion info text string."
+  },
+  "confirm": "Confirm",
+  "@confirm": {
+    "description": "Confirm string."
+  },
+  "requiresRecentLogin": "Please log in and out of the app and try again.",
+  "@requiresRecentLogin": {
+    "description": "Account deletion requires recent login error string."
+  },
+  "error": "Unknown error occured.",
+  "@error": {
+    "description": "Unknown error string."
   }
 }

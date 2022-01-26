@@ -41,7 +41,9 @@ class ChatMessage extends StatelessWidget {
               constraints:
                   BoxConstraints(minWidth: sender ? 0 : 100, maxWidth: 300),
               decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor,
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Theme.of(context).colorScheme.primaryVariant
+                      : Theme.of(context).colorScheme.primary,
                   borderRadius: const BorderRadius.all(Radius.circular(8))),
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),

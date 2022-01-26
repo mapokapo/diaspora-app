@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:diaspora_app/constants/theme_data.dart';
 import 'package:diaspora_app/widgets/pages/app/chat_page.dart';
 import 'package:diaspora_app/widgets/pages/app/matches_page.dart';
 import 'package:diaspora_app/widgets/pages/app/profile_page.dart';
@@ -12,6 +13,7 @@ import 'package:diaspora_app/widgets/pages/guest/register_page.dart';
 import 'package:diaspora_app/widgets/scaffolds/app_scaffold.dart';
 import 'package:diaspora_app/widgets/scaffolds/landing_scaffold.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:vrouter/vrouter.dart';
 
 class Routes {
@@ -40,32 +42,34 @@ class Routes {
           // landing nest
           VNester(
             path: '/',
-            widgetBuilder: (child) => LandingScaffold(body: child),
+            widgetBuilder: (child) =>
+                Theme(data: lightTheme, child: LandingScaffold(body: child)),
             nestedRoutes: [
               // landing page
               VWidget(
                 path: null,
-                widget: const LandingPage(),
+                widget: Theme(data: lightTheme, child: const LandingPage()),
               ),
               // login page
               VWidget(
                 path: "login",
-                widget: const LoginPage(),
+                widget: Theme(data: lightTheme, child: const LoginPage()),
               ),
               // register page
               VWidget(
                 path: "register",
-                widget: const RegisterPage(),
+                widget: Theme(data: lightTheme, child: const RegisterPage()),
               ),
               // forgot password page
               VWidget(
                 path: "forgot_password",
-                widget: const ForgotPasswordPage(),
+                widget:
+                    Theme(data: lightTheme, child: const ForgotPasswordPage()),
               ),
               // login help page
               VWidget(
                 path: "login_help",
-                widget: LoginHelpPage(),
+                widget: Theme(data: lightTheme, child: LoginHelpPage()),
               ),
             ],
           ),

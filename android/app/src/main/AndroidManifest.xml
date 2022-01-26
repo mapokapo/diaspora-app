@@ -2,8 +2,8 @@
     package="com.example.diaspora_app">
    <application
         android:usesCleartextTraffic="true"
-        android:label="diaspora_app"
-        android:icon="@mipmap/ic_launcher">
+        android:label="Diaspora"
+        android:icon="@mipmap/launcher_icon">
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"

@@ -24,4 +24,9 @@ class ThemeModeNotifier extends ChangeNotifier {
     _themeMode = newThemeMode;
     notifyListeners();
   }
+
+  void toggleThemeMode() {
+    setThemeMode(
+        themeMode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark);
+  }
 }

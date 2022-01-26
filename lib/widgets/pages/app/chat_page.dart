@@ -161,6 +161,13 @@ class _ChatPageState extends State<ChatPage> {
                                         final _messagesCollection =
                                             FirebaseFirestore.instance
                                                 .collection('messages');
+                                        final _userRef = FirebaseFirestore
+                                            .instance
+                                            .collection('users')
+                                            .doc(FirebaseAuth
+                                                .instance.currentUser!.uid);
+                                        final _currentUser =
+                                            await _userRef.get();
                                         await _messagesCollection.add({
                                           'senderId': FirebaseAuth
                                               .instance.currentUser!.uid,
@@ -168,6 +175,14 @@ class _ChatPageState extends State<ChatPage> {
                                           'text': _message,
                                           'sentAt': DateTime.now(),
                                         });
+                                        if (!List<String>.from(
+                                                _currentUser.get('matches'))
+                                            .contains(_match.id)) {
+                                          await _userRef.update({
+                                            'matches': FieldValue.arrayUnion(
+                                                [_match.id]),
+                                          });
+                                        }
                                         _textController.clear();
                                       }
                                     },

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:diaspora_app/constants/user_interests.dart';
 import 'package:diaspora_app/widgets/partials/auth_button.dart';
+import 'package:diaspora_app/widgets/partials/form_builder_image_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -55,9 +56,6 @@ class _RegisterPageState extends State<RegisterPage> {
           _uploading = true;
         });
         uploadTask.whenComplete(() {
-          setState(() {
-            _uploading = false;
-          });
           context.vRouter.to("/app", isReplacement: true, historyState: {});
         });
       } else {
@@ -115,56 +113,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 12),
-                    FormBuilderField<XFile?>(
-                      initialValue: null,
-                      builder: (state) {
-                        return InkWell(
-                          onTap: () async {
-                            final picker = ImagePicker();
-                            final image = await picker.pickImage(
-                                source: ImageSource.gallery);
-                            state.didChange(image);
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 96),
-                            child: AspectRatio(
-                              aspectRatio: 1,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: Theme.of(context).colorScheme.primary,
-                                  image: state.value != null
-                                      ? DecorationImage(
-                                          image: FileImage(
-                                              File(state.value!.path)),
-                                          fit: BoxFit.cover,
-                                        )
-                                      : context.vRouter.queryParameters
-                                              .containsKey('photoUrl')
-                                          ? DecorationImage(
-                                              image: NetworkImage(context
-                                                      .vRouter.queryParameters[
-                                                  'photoUrl']!),
-                                              fit: BoxFit.cover,
-                                            )
-                                          : const DecorationImage(
-                                              image: AssetImage(
-                                                  'assets/images/profile.png'),
-                                            ),
-                                  borderRadius: const BorderRadius.all(
-                                      Radius.circular(25)),
-                                  border: Border.all(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .primaryVariant,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                      name: 'image',
-                    ),
+                    FormBuilderImagePicker<XFile?>(name: 'image'),
                     if (_error == null) const SizedBox(height: 32),
                     if (_error != null) const SizedBox(height: 8),
                     if (_error != null)
@@ -275,8 +224,6 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                     const SizedBox(height: 16.0),
                     FormBuilderCheckboxGroup<String>(
-                      focusNode: _formKey.currentState?.fields['interests']!
-                          .effectiveFocusNode,
                       name: 'interests',
                       decoration: InputDecoration(
                         labelText: AppLocalizations.of(context)!.yourInterests,

@@ -73,24 +73,27 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
           AuthButton(
             title: AppLocalizations.of(context)!.submit,
             onClick: () async {
-              // TODO
-              // Test this
               if (_formKey.currentState?.saveAndValidate() ?? false) {
                 try {
-                  FirebaseAuth.instance.sendPasswordResetEmail(
+                  await FirebaseAuth.instance.sendPasswordResetEmail(
                       email: _formKey.currentState!.value['email']);
                 } on FirebaseAuthException catch (e) {
                   final code = e.code.split("/").last;
-                  String? errStr;
+                  String? errStr, field;
                   if (code == "user-not-found") {
                     errStr = AppLocalizations.of(context)!.userNotFound;
                   } else if (code == "invalid-email") {
                     errStr =
                         AppLocalizations.of(context)!.fieldInvalid("email");
+                    field = 'email';
                   }
-                  if (errStr != null) {
+                  if (errStr != null && field != null) {
                     _formKey.currentState!
-                        .invalidateField(name: 'email', errorText: errStr);
+                        .invalidateField(name: field, errorText: errStr);
+                  } else if (errStr != null && field == null) {
+                    setState(() {
+                      _error = errStr;
+                    });
                   } else {
                     setState(() {
                       _error = e.message;
