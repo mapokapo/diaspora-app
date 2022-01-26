@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class Match {
@@ -30,6 +31,20 @@ class Match {
   static Future<Match> fromQuery(
       QueryDocumentSnapshot<Map<String, dynamic>> snapshot) async {
     return Match._from(snapshot);
+  }
+
+  static Future<Match> fromId(String id) async {
+    debugPrint(id);
+    final _matchIds = List<String>.from((await FirebaseFirestore.instance
+            .collection('users')
+            .doc(FirebaseAuth.instance.currentUser!.uid)
+            .get())
+        .get('matches'));
+    final _matchData = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(_matchIds.firstWhere((m) => m == id))
+        .get();
+    return Match.fromDoc(_matchData);
   }
 
   static Future<Match> _from(dynamic snapshot) async {

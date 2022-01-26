@@ -1,8 +1,11 @@
+import 'package:diaspora_app/constants/match.dart';
 import 'package:diaspora_app/state/current_match_notifier.dart';
 import 'package:diaspora_app/state/language_notifier.dart';
+import 'package:diaspora_app/state/match_selection_provider.dart';
 import 'package:diaspora_app/state/theme_mode_notifier.dart';
 import 'package:diaspora_app/widgets/partials/user_avatar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
@@ -23,6 +26,28 @@ class _AppScaffoldState extends State<AppScaffold> {
 
   void _onItemTapped(int index) {
     context.vRouter.to(_routes[index], isReplacement: true);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    FirebaseMessaging.instance
+        .getInitialMessage()
+        .then((_initialMessage) async {
+      if (_initialMessage != null &&
+          _initialMessage.data.containsKey('senderId')) {
+        final _match = await Match.fromId(_initialMessage.data['senderId']);
+        Provider.of<CurrentMatchNotifier>(context, listen: false)
+            .setMatch(_match);
+        context.vRouter.to('chat');
+      }
+    });
+    FirebaseMessaging.onMessageOpenedApp.listen((message) async {
+      final _match = await Match.fromId(message.data['senderId']);
+      Provider.of<CurrentMatchNotifier>(context, listen: false)
+          .setMatch(_match);
+      context.vRouter.to('chat');
+    });
   }
 
   @override
@@ -78,12 +103,35 @@ class _AppScaffoldState extends State<AppScaffold> {
         appBar: Provider.of<CurrentMatchNotifier>(context).match == null
             ? AppBar(
                 title: Text(AppLocalizations.of(context)!.appName),
-                leading: IconButton(
-                  icon: const Icon(Icons.menu),
-                  onPressed: () {
-                    _scaffoldKey.currentState!.openDrawer();
-                  },
-                ),
+                leading:
+                    Provider.of<MatchSelectionNotifier>(context).selectionMode()
+                        ? IconButton(
+                            onPressed: () {
+                              Provider.of<MatchSelectionNotifier>(context,
+                                      listen: false)
+                                  .removeIndexes();
+                            },
+                            icon: const Icon(Icons.close),
+                          )
+                        : IconButton(
+                            icon: const Icon(Icons.menu),
+                            onPressed: () {
+                              _scaffoldKey.currentState!.openDrawer();
+                            },
+                          ),
+                actions: Provider.of<MatchSelectionNotifier>(context)
+                        .selectionMode()
+                    ? [
+                        IconButton(
+                          onPressed: () async {
+                            await Provider.of<MatchSelectionNotifier>(context,
+                                    listen: false)
+                                .deleteMatches();
+                          },
+                          icon: const Icon(Icons.delete),
+                        ),
+                      ]
+                    : null,
               )
             : AppBar(
                 title: Text(

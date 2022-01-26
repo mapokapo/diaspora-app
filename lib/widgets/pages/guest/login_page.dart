@@ -56,136 +56,143 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          Text(
-            AppLocalizations.of(context)!.log('in').toUpperCase(),
-            style: Theme.of(context)
-                .textTheme
-                .headline1
-                ?.copyWith(fontWeight: FontWeight.bold),
-          ),
-          const Spacer(),
-          if (_error != null)
-            Text(
-              _error!,
-              textAlign: TextAlign.center,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyText2!
-                  .copyWith(color: Theme.of(context).errorColor),
-            ),
-          if (_error != null) const SizedBox(height: 8),
-          FormBuilder(
-            key: _formKey,
-            child: Column(
-              children: [
-                FormBuilderTextField(
-                  name: 'email',
-                  keyboardType: TextInputType.emailAddress,
-                  textInputAction: TextInputAction.next,
-                  decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)!.email,
-                    border: const OutlineInputBorder(
-                      borderSide: BorderSide(
-                        color: Colors.black,
-                        width: 4.0,
+    return CustomScrollView(
+      slivers: [
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: FormBuilder(
+              key: _formKey,
+              child: Column(
+                children: [
+                  Text(
+                    AppLocalizations.of(context)!.log('in').toUpperCase(),
+                    style: Theme.of(context)
+                        .textTheme
+                        .headline1
+                        ?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  const Spacer(),
+                  if (_error != null)
+                    Text(
+                      _error!,
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyText2!
+                          .copyWith(color: Theme.of(context).errorColor),
+                    ),
+                  if (_error != null) const SizedBox(height: 8),
+                  FormBuilderTextField(
+                    name: 'email',
+                    keyboardType: TextInputType.emailAddress,
+                    textInputAction: TextInputAction.next,
+                    decoration: InputDecoration(
+                      labelText: AppLocalizations.of(context)!.email,
+                      border: const OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Colors.black,
+                          width: 4.0,
+                        ),
                       ),
                     ),
+                    validator: FormBuilderValidators.compose([
+                      FormBuilderValidators.required(context,
+                          errorText: AppLocalizations.of(context)!
+                              .fieldRequiredYour('email')),
+                      FormBuilderValidators.email(context,
+                          errorText: AppLocalizations.of(context)!
+                              .fieldInvalid('email')),
+                    ]),
                   ),
-                  validator: FormBuilderValidators.compose([
-                    FormBuilderValidators.required(context,
-                        errorText: AppLocalizations.of(context)!
-                            .fieldRequiredYour('email')),
-                    FormBuilderValidators.email(context,
-                        errorText: AppLocalizations.of(context)!
-                            .fieldInvalid('email')),
-                  ]),
-                ),
-                const SizedBox(height: 16.0),
-                FormBuilderTextField(
-                  name: 'password',
-                  keyboardType: TextInputType.text,
-                  textInputAction: TextInputAction.done,
-                  onEditingComplete: () async {
-                    if (_formKey.currentState?.saveAndValidate() ?? false) {
-                      await _handleLogin(_formKey.currentState?.value['email'],
-                          _formKey.currentState?.value['password']);
-                    }
-                  },
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)!.password,
-                    border: const OutlineInputBorder(
-                      borderSide: BorderSide(
-                        color: Colors.black,
-                        width: 4.0,
+                  const SizedBox(height: 16.0),
+                  FormBuilderTextField(
+                    name: 'password',
+                    keyboardType: TextInputType.text,
+                    textInputAction: TextInputAction.done,
+                    onEditingComplete: () async {
+                      if (_formKey.currentState?.saveAndValidate() ?? false) {
+                        await _handleLogin(
+                            _formKey.currentState?.value['email'],
+                            _formKey.currentState?.value['password']);
+                      }
+                    },
+                    obscureText: true,
+                    decoration: InputDecoration(
+                      labelText: AppLocalizations.of(context)!.password,
+                      border: const OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Colors.black,
+                          width: 4.0,
+                        ),
                       ),
                     ),
+                    validator: FormBuilderValidators.compose([
+                      FormBuilderValidators.required(context,
+                          errorText: AppLocalizations.of(context)!
+                              .fieldRequiredYour('password')),
+                    ]),
                   ),
-                  validator: FormBuilderValidators.compose([
-                    FormBuilderValidators.required(context,
-                        errorText: AppLocalizations.of(context)!
-                            .fieldRequiredYour('password')),
-                  ]),
-                ),
-              ],
+                  const SizedBox(height: 16.0),
+                  AuthButton(
+                    title: AppLocalizations.of(context)!.submit,
+                    onClick: () async {
+                      if (_formKey.currentState?.saveAndValidate() ?? false) {
+                        await _handleLogin(
+                            _formKey.currentState?.value['email'],
+                            _formKey.currentState?.value['password']);
+                      }
+                    },
+                  ),
+                  KeyboardVisibilityBuilder(
+                    builder: (context, keyboardVisible) => keyboardVisible
+                        ? const SizedBox()
+                        : Column(
+                            children: [
+                              const SizedBox(height: 16.0),
+                              TextButton(
+                                onPressed: () {
+                                  context.vRouter
+                                      .to('/register', isReplacement: true);
+                                },
+                                style: TextButton.styleFrom(
+                                  minimumSize: Size.zero,
+                                  padding: const EdgeInsets.all(12.0),
+                                  tapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
+                                ),
+                                child: Text(
+                                  AppLocalizations.of(context)!.hasNoAccount,
+                                  style: Theme.of(context).textTheme.bodyText2,
+                                ),
+                              ),
+                              const SizedBox(height: 8.0),
+                              TextButton(
+                                onPressed: () {
+                                  context.vRouter.to("/forgot_password");
+                                },
+                                style: TextButton.styleFrom(
+                                  minimumSize: Size.zero,
+                                  padding: const EdgeInsets.all(12.0),
+                                  tapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
+                                ),
+                                child: Text(
+                                  AppLocalizations.of(context)!.forgotPassword,
+                                  style: Theme.of(context).textTheme.bodyText2,
+                                ),
+                              ),
+                              const SizedBox(height: 8.0),
+                            ],
+                          ),
+                  ),
+                ],
+              ),
             ),
           ),
-          const SizedBox(height: 16.0),
-          AuthButton(
-            title: AppLocalizations.of(context)!.submit,
-            onClick: () async {
-              if (_formKey.currentState?.saveAndValidate() ?? false) {
-                await _handleLogin(_formKey.currentState?.value['email'],
-                    _formKey.currentState?.value['password']);
-              }
-            },
-          ),
-          KeyboardVisibilityBuilder(
-            builder: (context, keyboardVisible) => keyboardVisible
-                ? const SizedBox()
-                : Column(
-                    children: [
-                      const SizedBox(height: 16.0),
-                      TextButton(
-                        onPressed: () {
-                          context.vRouter.to('/register', isReplacement: true);
-                        },
-                        style: TextButton.styleFrom(
-                          minimumSize: Size.zero,
-                          padding: const EdgeInsets.all(12.0),
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        ),
-                        child: Text(
-                          AppLocalizations.of(context)!.hasNoAccount,
-                          style: Theme.of(context).textTheme.bodyText2,
-                        ),
-                      ),
-                      const SizedBox(height: 8.0),
-                      TextButton(
-                        onPressed: () {
-                          context.vRouter.to("/forgot_password");
-                        },
-                        style: TextButton.styleFrom(
-                          minimumSize: Size.zero,
-                          padding: const EdgeInsets.all(12.0),
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        ),
-                        child: Text(
-                          AppLocalizations.of(context)!.forgotPassword,
-                          style: Theme.of(context).textTheme.bodyText2,
-                        ),
-                      ),
-                      const SizedBox(height: 8.0),
-                    ],
-                  ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

@@ -34,6 +34,8 @@ class _SwipePageState extends State<SwipePage> {
                   currentUserDoB.add(const Duration(days: 365 * 2))),
             )
             .where('interests', arrayContainsAny: currentUser.get('interests'))
+            // TODO
+            // paginate matches to get 10 per load
             .get())
         .docs
         .where((e) => e.id != FirebaseAuth.instance.currentUser!.uid)

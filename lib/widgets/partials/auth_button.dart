@@ -20,6 +20,7 @@ class AuthButton extends StatelessWidget {
           child: Text(
             title.toUpperCase(),
             style: Theme.of(context).textTheme.button,
+            textAlign: TextAlign.center,
           ),
         ),
       ),

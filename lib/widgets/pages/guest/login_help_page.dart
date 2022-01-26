@@ -35,110 +35,115 @@ class LoginHelpPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Text(
-              AppLocalizations.of(context)!.loginHelpText1,
-              style: Theme.of(context).textTheme.bodyText1!.copyWith(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 22,
+    return CustomScrollView(
+      slivers: [
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                Text(
+                  AppLocalizations.of(context)!.loginHelpText1,
+                  style: Theme.of(context).textTheme.bodyText1!.copyWith(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 22,
+                      ),
+                ),
+                const Spacer(),
+                Padding(
+                  padding: const EdgeInsets.only(left: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _textPoint(context,
+                          AppLocalizations.of(context)!.loginHelpPoint1),
+                      _textPoint(context,
+                          AppLocalizations.of(context)!.loginHelpPoint2),
+                      _textPoint(context,
+                          AppLocalizations.of(context)!.loginHelpPoint3),
+                      _textPoint(context,
+                          AppLocalizations.of(context)!.loginHelpPoint4),
+                    ],
                   ),
-            ),
-            const SizedBox(height: 16),
-            Padding(
-              padding: const EdgeInsets.only(left: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _textPoint(
-                      context, AppLocalizations.of(context)!.loginHelpPoint1),
-                  _textPoint(
-                      context, AppLocalizations.of(context)!.loginHelpPoint2),
-                  _textPoint(
-                      context, AppLocalizations.of(context)!.loginHelpPoint3),
-                  _textPoint(
-                      context, AppLocalizations.of(context)!.loginHelpPoint4),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              AppLocalizations.of(context)!.loginHelpText2,
-              style: Theme.of(context).textTheme.bodyText1!.copyWith(
-                    fontSize: 22,
-                  ),
-            ),
-            const SizedBox(height: 16),
-            FormBuilder(
-              key: _formKey,
-              child: Column(
-                children: [
-                  FormBuilderTextField(
-                    name: 'name',
-                    keyboardType: TextInputType.name,
-                    validator: FormBuilderValidators.compose([
-                      FormBuilderValidators.required(context,
-                          errorText: AppLocalizations.of(context)!
-                              .fieldRequired('name')),
-                      FormBuilderValidators.match(context, r'\w+( +\w+)*',
-                          errorText: AppLocalizations.of(context)!
-                              .fieldInvalid('name')),
-                    ]),
-                    decoration: InputDecoration(
-                      labelText: AppLocalizations.of(context)!.name,
-                      border: const OutlineInputBorder(
-                        borderSide: BorderSide(
-                          color: Colors.black,
-                          width: 4.0,
+                ),
+                const Spacer(),
+                Text(
+                  AppLocalizations.of(context)!.loginHelpText2,
+                  style: Theme.of(context).textTheme.bodyText1!.copyWith(
+                        fontSize: 22,
+                      ),
+                ),
+                const Spacer(),
+                FormBuilder(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      FormBuilderTextField(
+                        name: 'name',
+                        keyboardType: TextInputType.name,
+                        validator: FormBuilderValidators.compose([
+                          FormBuilderValidators.required(context,
+                              errorText: AppLocalizations.of(context)!
+                                  .fieldRequired('name')),
+                          FormBuilderValidators.match(context, r'\w+( +\w+)*',
+                              errorText: AppLocalizations.of(context)!
+                                  .fieldInvalid('name')),
+                        ]),
+                        decoration: InputDecoration(
+                          labelText: AppLocalizations.of(context)!.name,
+                          border: const OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: Colors.black,
+                              width: 4.0,
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  FormBuilderTextField(
-                    name: 'content',
-                    minLines: 3,
-                    maxLines: null,
-                    keyboardType: TextInputType.text,
-                    validator: FormBuilderValidators.compose([
-                      FormBuilderValidators.required(context,
-                          errorText: AppLocalizations.of(context)!
-                              .fieldRequired('content')),
-                    ]),
-                    decoration: InputDecoration(
-                      labelText: AppLocalizations.of(context)!.content,
-                      border: const OutlineInputBorder(
-                        borderSide: BorderSide(
-                          color: Colors.black,
-                          width: 4.0,
+                      const SizedBox(height: 16),
+                      FormBuilderTextField(
+                        name: 'content',
+                        minLines: 3,
+                        maxLines: null,
+                        keyboardType: TextInputType.text,
+                        validator: FormBuilderValidators.compose([
+                          FormBuilderValidators.required(context,
+                              errorText: AppLocalizations.of(context)!
+                                  .fieldRequired('content')),
+                        ]),
+                        decoration: InputDecoration(
+                          labelText: AppLocalizations.of(context)!.content,
+                          border: const OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: Colors.black,
+                              width: 4.0,
+                            ),
+                          ),
                         ),
                       ),
-                    ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+                const Spacer(),
+                AuthButton(
+                  title: AppLocalizations.of(context)!.submit,
+                  onClick: () async {
+                    if (_formKey.currentState?.saveAndValidate() ?? false) {
+                      final Email email = Email(
+                        body: _formKey.currentState!.value['content'],
+                        subject:
+                            "Diaspora bug report from \"${_formKey.currentState!.value['name']}\"",
+                        recipients: ["leopetrovic11@gmail.com"],
+                      );
+                      await FlutterEmailSender.send(email);
+                    }
+                  },
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
-            AuthButton(
-              title: AppLocalizations.of(context)!.submit,
-              onClick: () async {
-                if (_formKey.currentState?.saveAndValidate() ?? false) {
-                  final Email email = Email(
-                    body: _formKey.currentState!.value['content'],
-                    subject:
-                        "Diaspora bug report from \"${_formKey.currentState!.value['name']}\"",
-                    recipients: ["leopetrovic11@gmail.com"],
-                  );
-                  await FlutterEmailSender.send(email);
-                }
-              },
-            ),
-          ],
+          ),
         ),
-      ),
+      ],
     );
   }
 }

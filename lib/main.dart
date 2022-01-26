@@ -1,10 +1,14 @@
 // ignore_for_file: prefer_const_constructors
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:diaspora_app/constants/routes.dart';
 import 'package:diaspora_app/constants/theme_data.dart';
 import 'package:diaspora_app/state/current_match_notifier.dart';
 import 'package:diaspora_app/state/language_notifier.dart';
+import 'package:diaspora_app/state/match_selection_provider.dart';
 import 'package:diaspora_app/state/theme_mode_notifier.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 // import 'package:firebase_auth/firebase_auth.dart';
 // import 'package:firebase_database/firebase_database.dart';
 // import 'package:firebase_storage/firebase_storage.dart';
@@ -32,6 +36,24 @@ void main() async {
   // FirebaseStorage.instance.useStorageEmulator('10.0.2.2', 9199);
   // FirebaseDatabase.instance.useDatabaseEmulator('10.0.2.2', 9000);
 
+  final _isLoggedIn = FirebaseAuth.instance.currentUser != null;
+  if (_isLoggedIn) {
+    final _userRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(FirebaseAuth.instance.currentUser!.uid);
+
+    final _user = await _userRef.get();
+    if (_user.exists) {
+      final _deviceTokenExists = _user.data()!.keys.contains('deviceToken');
+      if (!_deviceTokenExists) {
+        final _token = await FirebaseMessaging.instance.getToken();
+        await _userRef.update({
+          'deviceToken': _token,
+        });
+      }
+    }
+  }
+
   final _sharedPreferences = await SharedPreferences.getInstance();
   final _storedLocale = _sharedPreferences.getString('locale');
   final _storedThemeMode = _sharedPreferences.getString('themeMode');
@@ -48,6 +70,7 @@ void main() async {
     ChangeNotifierProvider(
       create: (context) => CurrentMatchNotifier(),
     ),
+    ChangeNotifierProvider(create: (context) => MatchSelectionNotifier()),
   ];
   runApp(MyApp(
     providers: providers,
@@ -68,7 +91,14 @@ class MyApp extends StatelessWidget {
       builder: (BuildContext context, _) {
         return VRouter(
           onSystemPop: (redirector) async {
-            if (redirector.historyCanBack()) redirector.historyBack();
+            if (redirector.fromUrl == "/app/matches" &&
+                Provider.of<MatchSelectionNotifier>(context, listen: false)
+                    .selectionMode()) {
+              Provider.of<MatchSelectionNotifier>(context, listen: false)
+                  .removeIndexes();
+            } else {
+              if (redirector.historyCanBack()) redirector.historyBack();
+            }
           },
           afterEnter: (context, from, to) {
             if (from == "/app/matches/chat") {

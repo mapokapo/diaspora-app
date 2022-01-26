@@ -54,6 +54,8 @@ dependencies:
   flutter_tindercard:
     git:
       url: https://github.com/ShaunRain/flutter_tindercard.git
+  firebase_messaging: ^11.2.5
+  flutter_image_compress: ^1.1.0
 
 dev_dependencies:
   flutter_test:

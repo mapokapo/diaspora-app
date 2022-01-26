@@ -15,11 +15,19 @@
       },
       "oauth_client": [
         {
-          "client_id": "154558251344-g295qqvt3fjnci87ppf293rp07njbc3q.apps.googleusercontent.com",
+          "client_id": "154558251344-5dbpcdn29d0p81do8shmljuaouv3eoc8.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "me.mapokapo.diaspora_app",
-            "certificate_hash": "94dc1e9e719c519a970af8d60b6d49333b02d2b6"
+            "certificate_hash": "85506094a889147160bf1369dfc97997aec46235"
+          }
+        },
+        {
+          "client_id": "154558251344-ibm6su448idk3ldpqeepaacnbdv2auas.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "me.mapokapo.diaspora_app",
+            "certificate_hash": "88f7aa522e97ef61f732ad6e811ffabf4774fe6f"
           }
         },
         {

@@ -1,10 +1,12 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:diaspora_app/constants/user_interests.dart';
 import 'package:diaspora_app/widgets/partials/auth_button.dart';
 import 'package:diaspora_app/widgets/partials/form_builder_image_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
@@ -26,7 +28,7 @@ class _RegisterPageState extends State<RegisterPage> {
   bool _uploading = false;
   String? _error;
 
-  Future<void> _handleRegister(XFile? image, String name, String? email,
+  Future<void> _handleRegister(Uint8List? imageData, String name, String? email,
       String? password, DateTime dateOfBirth, List<String> interests,
       [String? uid, String? imageUrl]) async {
     try {
@@ -44,22 +46,24 @@ class _RegisterPageState extends State<RegisterPage> {
         'dateOfBirth': dateOfBirth,
         'interests': interests,
         'matches': [],
-        'imageUrl': image == null ? imageUrl : null,
+        'imageUrl': imageData == null ? imageUrl : null,
+        'deviceToken': await FirebaseMessaging.instance.getToken(),
       });
-      if (image != null) {
+      if (imageData != null) {
         final ref = FirebaseStorage.instance
             .ref("profile_images")
             .child(user != null ? user.uid : uid!);
-        final imageFile = File(image.path);
-        UploadTask uploadTask = ref.putFile(imageFile);
+        UploadTask uploadTask = ref.putFile(File.fromRawPath(imageData));
         setState(() {
           _uploading = true;
         });
-        uploadTask.whenComplete(() {
+        uploadTask.whenComplete(() async {
           context.vRouter.to("/app", isReplacement: true, historyState: {});
+          await FirebaseMessaging.instance.requestPermission();
         });
       } else {
         context.vRouter.to("/app", isReplacement: true, historyState: {});
+        await FirebaseMessaging.instance.requestPermission();
       }
     } on FirebaseAuthException catch (e) {
       final code = e.code.split("/").last;
@@ -92,212 +96,226 @@ class _RegisterPageState extends State<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: _uploading
-            ? const Center(
-                child: CircularProgressIndicator(),
-              )
-            : FormBuilder(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(
-                      AppLocalizations.of(context)!.register.toUpperCase(),
-                      style: Theme.of(context)
-                          .textTheme
-                          .headline1
-                          ?.copyWith(fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 12),
-                    FormBuilderImagePicker<XFile?>(name: 'image'),
-                    if (_error == null) const SizedBox(height: 32),
-                    if (_error != null) const SizedBox(height: 8),
-                    if (_error != null)
-                      Text(
-                        _error!,
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodyText2!
-                            .copyWith(color: Theme.of(context).errorColor),
-                      ),
-                    if (_error != null) const SizedBox(height: 8),
-                    FormBuilderTextField(
-                      initialValue: context.vRouter.queryParameters['name'],
-                      name: 'name',
-                      keyboardType: TextInputType.name,
-                      textInputAction: TextInputAction.next,
-                      decoration: InputDecoration(
-                        labelText: AppLocalizations.of(context)!.name,
-                        border: const OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Colors.black,
-                            width: 4.0,
-                          ),
+    return CustomScrollView(
+      slivers: [
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: _uploading
+                ? const Center(
+                    child: CircularProgressIndicator(),
+                  )
+                : FormBuilder(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          AppLocalizations.of(context)!.register.toUpperCase(),
+                          style: Theme.of(context)
+                              .textTheme
+                              .headline1
+                              ?.copyWith(fontWeight: FontWeight.bold),
+                          textAlign: TextAlign.center,
                         ),
-                      ),
-                      validator: FormBuilderValidators.compose([
-                        FormBuilderValidators.required(context,
-                            errorText: AppLocalizations.of(context)!
-                                .fieldRequiredYour('name')),
-                        FormBuilderValidators.match(context, r'\w+( +\w+)*',
-                            errorText: AppLocalizations.of(context)!
-                                .fieldInvalid('name')),
-                      ]),
-                    ),
-                    if (!context.vRouter.queryParameters.containsKey('name'))
-                      const SizedBox(height: 16.0),
-                    if (!context.vRouter.queryParameters.containsKey('name'))
-                      FormBuilderTextField(
-                        name: 'email',
-                        keyboardType: TextInputType.emailAddress,
-                        textInputAction: TextInputAction.next,
-                        decoration: InputDecoration(
-                          labelText: AppLocalizations.of(context)!.email,
-                          border: const OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Colors.black,
-                              width: 4.0,
-                            ),
+                        const SizedBox(height: 12),
+                        FormBuilderImagePicker(name: 'image'),
+                        if (_error == null) const SizedBox(height: 32),
+                        if (_error != null) const SizedBox(height: 8),
+                        if (_error != null)
+                          Text(
+                            _error!,
+                            textAlign: TextAlign.center,
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyText2!
+                                .copyWith(color: Theme.of(context).errorColor),
                           ),
-                        ),
-                        validator: FormBuilderValidators.compose([
-                          FormBuilderValidators.required(context,
-                              errorText: AppLocalizations.of(context)!
-                                  .fieldRequiredYour('email')),
-                          FormBuilderValidators.email(context,
-                              errorText: AppLocalizations.of(context)!
-                                  .fieldInvalid('email')),
-                        ]),
-                      ),
-                    if (!context.vRouter.queryParameters.containsKey('name'))
-                      const SizedBox(height: 16.0),
-                    if (!context.vRouter.queryParameters.containsKey('name'))
-                      FormBuilderTextField(
-                        name: 'password',
-                        keyboardType: TextInputType.text,
-                        textInputAction: TextInputAction.next,
-                        obscureText: true,
-                        decoration: InputDecoration(
-                          labelText: AppLocalizations.of(context)!.password,
-                          border: const OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Colors.black,
-                              width: 4.0,
-                            ),
-                          ),
-                        ),
-                        validator: FormBuilderValidators.compose([
-                          FormBuilderValidators.required(context,
-                              errorText: AppLocalizations.of(context)!
-                                  .fieldRequired('password')),
-                          FormBuilderValidators.minLength(context, 6,
-                              errorText: AppLocalizations.of(context)!
-                                  .passwordLengthError),
-                        ]),
-                      ),
-                    const SizedBox(height: 16),
-                    FormBuilderDateTimePicker(
-                      name: 'dateOfBirth',
-                      inputType: InputType.date,
-                      textInputAction: TextInputAction.next,
-                      decoration: InputDecoration(
-                        suffixIcon: const Icon(Icons.date_range),
-                        labelText: AppLocalizations.of(context)!.dateOfBirth,
-                        border: const OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Colors.black,
-                            width: 4.0,
-                          ),
-                        ),
-                      ),
-                      validator: FormBuilderValidators.compose([
-                        FormBuilderValidators.required(context,
-                            errorText: AppLocalizations.of(context)!
-                                .fieldRequiredYour('dateOfBirth')),
-                      ]),
-                      timePickerInitialEntryMode: TimePickerEntryMode.input,
-                    ),
-                    const SizedBox(height: 16.0),
-                    FormBuilderCheckboxGroup<String>(
-                      name: 'interests',
-                      decoration: InputDecoration(
-                        labelText: AppLocalizations.of(context)!.yourInterests,
-                        border: const OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Colors.black,
-                            width: 4.0,
-                          ),
-                        ),
-                      ),
-                      options: [
-                        ...userInterests.map((e) {
-                          return FormBuilderFieldOption(
-                              child: Text(
-                                getUserInterestLocalizedString(context, e),
+                        if (_error != null) const SizedBox(height: 8),
+                        FormBuilderTextField(
+                          initialValue: context.vRouter.queryParameters['name'],
+                          name: 'name',
+                          keyboardType: TextInputType.name,
+                          textInputAction: TextInputAction.next,
+                          decoration: InputDecoration(
+                            labelText: AppLocalizations.of(context)!.name,
+                            border: const OutlineInputBorder(
+                              borderSide: BorderSide(
+                                color: Colors.black,
+                                width: 4.0,
                               ),
-                              value: e.toLowerCase().replaceAll(" ", "_"));
-                        }).toList(),
+                            ),
+                          ),
+                          validator: FormBuilderValidators.compose([
+                            FormBuilderValidators.required(context,
+                                errorText: AppLocalizations.of(context)!
+                                    .fieldRequiredYour('name')),
+                            FormBuilderValidators.match(context, r'\w+( +\w+)*',
+                                errorText: AppLocalizations.of(context)!
+                                    .fieldInvalid('name')),
+                          ]),
+                        ),
+                        if (!context.vRouter.queryParameters
+                            .containsKey('name'))
+                          const SizedBox(height: 16.0),
+                        if (!context.vRouter.queryParameters
+                            .containsKey('name'))
+                          FormBuilderTextField(
+                            name: 'email',
+                            keyboardType: TextInputType.emailAddress,
+                            textInputAction: TextInputAction.next,
+                            decoration: InputDecoration(
+                              labelText: AppLocalizations.of(context)!.email,
+                              border: const OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Colors.black,
+                                  width: 4.0,
+                                ),
+                              ),
+                            ),
+                            validator: FormBuilderValidators.compose([
+                              FormBuilderValidators.required(context,
+                                  errorText: AppLocalizations.of(context)!
+                                      .fieldRequiredYour('email')),
+                              FormBuilderValidators.email(context,
+                                  errorText: AppLocalizations.of(context)!
+                                      .fieldInvalid('email')),
+                            ]),
+                          ),
+                        if (!context.vRouter.queryParameters
+                            .containsKey('name'))
+                          const SizedBox(height: 16.0),
+                        if (!context.vRouter.queryParameters
+                            .containsKey('name'))
+                          FormBuilderTextField(
+                            name: 'password',
+                            keyboardType: TextInputType.text,
+                            textInputAction: TextInputAction.next,
+                            obscureText: true,
+                            decoration: InputDecoration(
+                              labelText: AppLocalizations.of(context)!.password,
+                              border: const OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Colors.black,
+                                  width: 4.0,
+                                ),
+                              ),
+                            ),
+                            validator: FormBuilderValidators.compose([
+                              FormBuilderValidators.required(context,
+                                  errorText: AppLocalizations.of(context)!
+                                      .fieldRequired('password')),
+                              FormBuilderValidators.minLength(context, 6,
+                                  errorText: AppLocalizations.of(context)!
+                                      .passwordLengthError),
+                            ]),
+                          ),
+                        const SizedBox(height: 16),
+                        FormBuilderDateTimePicker(
+                          name: 'dateOfBirth',
+                          inputType: InputType.date,
+                          textInputAction: TextInputAction.next,
+                          decoration: InputDecoration(
+                            suffixIcon: const Icon(Icons.date_range),
+                            labelText:
+                                AppLocalizations.of(context)!.dateOfBirth,
+                            border: const OutlineInputBorder(
+                              borderSide: BorderSide(
+                                color: Colors.black,
+                                width: 4.0,
+                              ),
+                            ),
+                          ),
+                          validator: FormBuilderValidators.compose([
+                            FormBuilderValidators.required(context,
+                                errorText: AppLocalizations.of(context)!
+                                    .fieldRequiredYour('dateOfBirth')),
+                          ]),
+                          timePickerInitialEntryMode: TimePickerEntryMode.input,
+                        ),
+                        const SizedBox(height: 16.0),
+                        FormBuilderCheckboxGroup<String>(
+                          name: 'interests',
+                          decoration: InputDecoration(
+                            labelText:
+                                AppLocalizations.of(context)!.yourInterests,
+                            border: const OutlineInputBorder(
+                              borderSide: BorderSide(
+                                color: Colors.black,
+                                width: 4.0,
+                              ),
+                            ),
+                          ),
+                          options: [
+                            ...userInterests.map((e) {
+                              return FormBuilderFieldOption(
+                                  child: Text(
+                                    getUserInterestLocalizedString(context, e),
+                                  ),
+                                  value: e.toLowerCase().replaceAll(" ", "_"));
+                            }).toList(),
+                          ],
+                        ),
+                        const SizedBox(height: 16.0),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: AuthButton(
+                            title: AppLocalizations.of(context)!.submit,
+                            onClick: () async {
+                              if (_formKey.currentState?.saveAndValidate() ??
+                                  false) {
+                                final values = _formKey.currentState!.value;
+                                await _handleRegister(
+                                  values['image'],
+                                  values['name'],
+                                  values['email'],
+                                  values['password'],
+                                  DateTime.parse(
+                                      values['dateOfBirth'].toString()),
+                                  values['interests'] as List<String>,
+                                  context.vRouter.queryParameters['uid'],
+                                  context.vRouter.queryParameters['photoUrl'],
+                                );
+                              }
+                            },
+                          ),
+                        ),
+                        const SizedBox(height: 20.0),
+                        KeyboardVisibilityBuilder(
+                          builder: (context, keyboardVisible) => keyboardVisible
+                              ? const SizedBox()
+                              : Column(
+                                  children: [
+                                    TextButton(
+                                      onPressed: () {
+                                        context.vRouter
+                                            .to('/login', isReplacement: true);
+                                      },
+                                      style: TextButton.styleFrom(
+                                        minimumSize: Size.zero,
+                                        padding: const EdgeInsets.all(12.0),
+                                        tapTargetSize:
+                                            MaterialTapTargetSize.shrinkWrap,
+                                      ),
+                                      child: Text(
+                                        AppLocalizations.of(context)!
+                                            .hasAccount,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyText2,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8.0),
+                                  ],
+                                ),
+                        ),
                       ],
                     ),
-                    const SizedBox(height: 16.0),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: AuthButton(
-                        title: AppLocalizations.of(context)!.submit,
-                        onClick: () async {
-                          if (_formKey.currentState?.saveAndValidate() ??
-                              false) {
-                            final values = _formKey.currentState!.value;
-                            await _handleRegister(
-                              values['image'],
-                              values['name'],
-                              values['email'],
-                              values['password'],
-                              DateTime.parse(values['dateOfBirth'].toString()),
-                              values['interests'] as List<String>,
-                              context.vRouter.queryParameters['uid'],
-                              context.vRouter.queryParameters['photoUrl'],
-                            );
-                          }
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: 20.0),
-                    KeyboardVisibilityBuilder(
-                      builder: (context, keyboardVisible) => keyboardVisible
-                          ? const SizedBox()
-                          : Column(
-                              children: [
-                                TextButton(
-                                  onPressed: () {
-                                    context.vRouter
-                                        .to('/login', isReplacement: true);
-                                  },
-                                  style: TextButton.styleFrom(
-                                    minimumSize: Size.zero,
-                                    padding: const EdgeInsets.all(12.0),
-                                    tapTargetSize:
-                                        MaterialTapTargetSize.shrinkWrap,
-                                  ),
-                                  child: Text(
-                                    AppLocalizations.of(context)!.hasAccount,
-                                    style:
-                                        Theme.of(context).textTheme.bodyText2,
-                                  ),
-                                ),
-                                const SizedBox(height: 8.0),
-                              ],
-                            ),
-                    ),
-                  ],
-                ),
-              ),
-      ),
+                  ),
+          ),
+        ),
+      ],
     );
   }
 }

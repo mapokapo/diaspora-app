@@ -17,18 +17,27 @@ class ChatPage extends StatefulWidget {
 
 class _ChatPageState extends State<ChatPage> {
   late Match _match;
-  late Stream<QuerySnapshot<Map<String, dynamic>>> _messagesStream;
+  late Stream<List<QueryDocumentSnapshot<Map<String, dynamic>>>>
+      _messagesStream;
   DocumentSnapshot<Map<String, dynamic>>? _currentUser;
   final TextEditingController _textController = TextEditingController();
 
-  Stream<QuerySnapshot<Map<String, dynamic>>> _getMessagesStream() {
+  Stream<List<QueryDocumentSnapshot<Map<String, dynamic>>>>
+      _getMessagesStream() {
     final _messagesRef = FirebaseFirestore.instance.collection('messages');
     final _messagesStream = _messagesRef
         .where('senderId',
             whereIn: [_match.id, FirebaseAuth.instance.currentUser!.uid])
         .orderBy('sentAt', descending: true)
         .snapshots();
-    return _messagesStream;
+    return _messagesStream
+        .map<List<QueryDocumentSnapshot<Map<String, dynamic>>>>((s) {
+      return s.docs
+          .where((e) =>
+              e.get('receiverId') == FirebaseAuth.instance.currentUser!.uid ||
+              e.get('receiverId') == _match.id)
+          .toList();
+    });
   }
 
   @override
@@ -54,7 +63,7 @@ class _ChatPageState extends State<ChatPage> {
       behavior: HitTestBehavior.translucent,
       child: _currentUser == null
           ? const Center(child: CircularProgressIndicator())
-          : StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+          : StreamBuilder<List<QueryDocumentSnapshot<Map<String, dynamic>>>>(
               stream: _messagesStream,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -70,7 +79,7 @@ class _ChatPageState extends State<ChatPage> {
                                 child: ListView(
                                   reverse: true,
                                   children: [
-                                    ...snapshot.data!.docs
+                                    ...snapshot.data!
                                         .asMap()
                                         .map(
                                           (i, e) {
@@ -88,12 +97,10 @@ class _ChatPageState extends State<ChatPage> {
                                                 text: _message.text,
                                                 sentAt: _message.sentAt,
                                                 prevMessage: i + 1 >=
-                                                        snapshot
-                                                            .data!.docs.length
+                                                        snapshot.data!.length
                                                     ? null
                                                     : Message.from(
-                                                        snapshot
-                                                            .data!.docs[i + 1],
+                                                        snapshot.data![i + 1],
                                                       ),
                                               ),
                                             );

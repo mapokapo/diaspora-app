@@ -279,8 +279,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                                           )
                                                         : (_option.value
                                                                 is Uint8List?)
-                                                            ? FormBuilderImagePicker<
-                                                                Uint8List?>(
+                                                            ? FormBuilderImagePicker(
                                                                 name: _option
                                                                     .name,
                                                                 initialValue:
