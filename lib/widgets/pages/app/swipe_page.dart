@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:diaspora_app/constants/match.dart';
+import 'package:diaspora_app/constants/user_interests.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tindercard/flutter_tindercard.dart';
@@ -88,7 +89,34 @@ class _SwipePageState extends State<SwipePage> {
     return _loading
         ? const Center(child: CircularProgressIndicator())
         : _matches!.isEmpty
-            ? Center(child: Text(AppLocalizations.of(context)!.noUsersFound))
+            ? Center(
+                child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(AppLocalizations.of(context)!.noUsersFound),
+                  IconButton(
+                    onPressed: () {
+                      setState(() {
+                        _loading = true;
+                        _matches = null;
+                      });
+                      _getMatches().then((value) async {
+                        if (mounted) {
+                          setState(() {
+                            _matches = value;
+                            _loading = false;
+                          });
+                        }
+                      });
+                    },
+                    icon: Icon(
+                      Icons.refresh,
+                      size: 32,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                ],
+              ))
             : Stack(
                 alignment: Alignment.center,
                 children: [
@@ -231,6 +259,9 @@ class _SwipePageState extends State<SwipePage> {
                                                 ": " +
                                                 _matches![index]
                                                     .interests
+                                                    .map((e) =>
+                                                        getUserInterestLocalizedString(
+                                                            context, e))
                                                     .join(", ")),
                                             style: Theme.of(context)
                                                 .textTheme

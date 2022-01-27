@@ -21,7 +21,7 @@ class UserAvatar extends StatelessWidget {
       child: imageData != null
           ? Image.memory(
               imageData!,
-              fit: BoxFit.fitWidth,
+              fit: BoxFit.cover,
             )
           : Padding(
               padding: const EdgeInsets.all(4.0),
