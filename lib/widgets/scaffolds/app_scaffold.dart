@@ -70,14 +70,31 @@ class _AppScaffoldState extends State<AppScaffold> {
                     isReplacement: true,
                   );
                 },
-                child: Text(AppLocalizations.of(context)!.log('out')),
+                child: Row(
+                  children: [
+                    const Icon(Icons.logout),
+                    const SizedBox(width: 16),
+                    Flexible(
+                        child: Text(AppLocalizations.of(context)!.log('out'))),
+                  ],
+                ),
               ),
               TextButton(
                 onPressed: () async {
                   Provider.of<ThemeModeNotifier>(context, listen: false)
                       .toggleThemeMode();
                 },
-                child: Text(AppLocalizations.of(context)!.toggleTheme),
+                child: Row(
+                  children: [
+                    Provider.of<ThemeModeNotifier>(context).themeMode ==
+                            ThemeMode.dark
+                        ? const Icon(Icons.light_mode)
+                        : const Icon(Icons.dark_mode),
+                    const SizedBox(width: 16),
+                    Flexible(
+                        child: Text(AppLocalizations.of(context)!.toggleTheme)),
+                  ],
+                ),
               ),
               TextButton(
                 onPressed: () async {
@@ -89,13 +106,21 @@ class _AppScaffoldState extends State<AppScaffold> {
                           ? const Locale("hr")
                           : const Locale("en"));
                 },
-                child: Text(AppLocalizations.of(context)!.changeLanguage(
-                    Provider.of<LanguageNotifier>(context, listen: false)
-                                .locale
-                                .languageCode ==
-                            "en"
-                        ? "hr"
-                        : "en")),
+                child: Row(
+                  children: [
+                    const Icon(Icons.language),
+                    const SizedBox(width: 16),
+                    Flexible(
+                      child: Text(AppLocalizations.of(context)!.changeLanguage(
+                          Provider.of<LanguageNotifier>(context, listen: false)
+                                      .locale
+                                      .languageCode ==
+                                  "en"
+                              ? "hr"
+                              : "en")),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -109,7 +134,7 @@ class _AppScaffoldState extends State<AppScaffold> {
                             onPressed: () {
                               Provider.of<MatchSelectionNotifier>(context,
                                       listen: false)
-                                  .removeIndexes();
+                                  .removeIds();
                             },
                             icon: const Icon(Icons.close),
                           )

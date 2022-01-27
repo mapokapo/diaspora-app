@@ -95,7 +95,7 @@ class MyApp extends StatelessWidget {
                 Provider.of<MatchSelectionNotifier>(context, listen: false)
                     .selectionMode()) {
               Provider.of<MatchSelectionNotifier>(context, listen: false)
-                  .removeIndexes();
+                  .removeIds();
             } else {
               if (redirector.historyCanBack()) redirector.historyBack();
             }

@@ -5,7 +5,6 @@ import 'package:diaspora_app/utils/interests_icon_converter.dart';
 import 'package:diaspora_app/constants/match.dart';
 import 'package:diaspora_app/widgets/partials/user_avatar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
@@ -80,8 +79,6 @@ class _MatchesPageState extends State<MatchesPage> {
       if (_matches == null ||
           (firstRun &&
               !_m.any((e) => _matches!.map((s) => s.id).contains(e.id)))) {
-        Provider.of<MatchSelectionNotifier>(context, listen: false).matches =
-            _m;
         _matches = _matches != null ? (_matches! + _m) : _m;
       } else {
         _noMatches = true;
@@ -98,6 +95,12 @@ class _MatchesPageState extends State<MatchesPage> {
 
   @override
   Widget build(BuildContext context) {
+    final _matchesChanged =
+        Provider.of<MatchSelectionNotifier>(context).changed;
+    if (_matchesChanged) {
+      Provider.of<MatchSelectionNotifier>(context).changed = false;
+      _loadData();
+    }
     return RefreshIndicator(
       onRefresh: () async {
         if (Provider.of<MatchSelectionNotifier>(context, listen: false)
@@ -105,7 +108,7 @@ class _MatchesPageState extends State<MatchesPage> {
         _loadData();
         await Future.delayed(const Duration(milliseconds: 200));
       },
-      child: _currentUser == null || _matches == null
+      child: _matchesChanged || _currentUser == null || _matches == null
           ? const Center(child: CircularProgressIndicator())
           : _matches!.isEmpty
               ? Center(
@@ -166,7 +169,7 @@ class _MatchesPageState extends State<MatchesPage> {
                                       Provider.of<MatchSelectionNotifier>(
                                               context,
                                               listen: false)
-                                          .addIndex(index);
+                                          .addId(_matches![index].id);
                                     },
                                     onTap: () {
                                       if (Provider.of<MatchSelectionNotifier>(
@@ -176,7 +179,7 @@ class _MatchesPageState extends State<MatchesPage> {
                                         Provider.of<MatchSelectionNotifier>(
                                                 context,
                                                 listen: false)
-                                            .addOrRemove(index);
+                                            .addOrRemove(_matches![index].id);
                                       } else {
                                         Provider.of<CurrentMatchNotifier>(
                                                 context,
@@ -192,12 +195,14 @@ class _MatchesPageState extends State<MatchesPage> {
                                             value: Provider.of<
                                                         MatchSelectionNotifier>(
                                                     context)
-                                                .contains(index),
+                                                .contains(_matches![index].id),
                                             onChanged: (newValue) {
                                               Provider.of<MatchSelectionNotifier>(
                                                       context,
                                                       listen: false)
-                                                  .addOrRemove(index, newValue);
+                                                  .addOrRemove(
+                                                      _matches![index].id,
+                                                      newValue);
                                             })
                                         : UserAvatar(
                                             _matches![index].imageData),

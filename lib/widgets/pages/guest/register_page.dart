@@ -12,7 +12,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:vrouter/vrouter.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -120,7 +119,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 12),
-                        FormBuilderImagePicker(name: 'image'),
+                        const FormBuilderImagePicker(name: 'image'),
                         if (_error == null) const SizedBox(height: 32),
                         if (_error != null) const SizedBox(height: 8),
                         if (_error != null)

@@ -34,8 +34,6 @@ class _SwipePageState extends State<SwipePage> {
                   currentUserDoB.add(const Duration(days: 365 * 2))),
             )
             .where('interests', arrayContainsAny: currentUser.get('interests'))
-            // TODO
-            // paginate matches to get 10 per load
             .get())
         .docs
         .where((e) => e.id != FirebaseAuth.instance.currentUser!.uid)
@@ -71,11 +69,18 @@ class _SwipePageState extends State<SwipePage> {
     super.initState();
     _loading = true;
     _getMatches().then((value) async {
-      setState(() {
-        _matches = value;
-        _loading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _matches = value;
+          _loading = false;
+        });
+      }
     });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override
@@ -106,6 +111,34 @@ class _SwipePageState extends State<SwipePage> {
                   Padding(
                     padding: const EdgeInsets.only(bottom: 12),
                     child: TinderSwapCard(
+                      totalNum: _matches!.length,
+                      allowVerticalMovement: false,
+                      orientation: AmassOrientation.bottom,
+                      stackNum: 3,
+                      swipeEdge: 4.0,
+                      swipeUp: true,
+                      maxWidth: MediaQuery.of(context).size.width * 0.85,
+                      maxHeight: MediaQuery.of(context).size.height * 0.9,
+                      minWidth: MediaQuery.of(context).size.width * 0.8,
+                      minHeight: MediaQuery.of(context).size.width * 0.5,
+                      swipeCompleteCallback: (orientation, index) async {
+                        if (orientation == CardSwipeOrientation.right) {
+                          final _userRef = FirebaseFirestore.instance
+                              .collection('users')
+                              .doc(FirebaseAuth.instance.currentUser!.uid);
+                          await _userRef.update({
+                            'matches':
+                                FieldValue.arrayUnion([_matches![index].id]),
+                          });
+                        }
+                        if (orientation != CardSwipeOrientation.recover) {
+                          setState(() {
+                            _matches = _matches!
+                                .where((e) => e.id != _matches![index].id)
+                                .toList();
+                          });
+                        }
+                      },
                       cardBuilder: (context, index) {
                         return Material(
                           borderRadius:
@@ -217,34 +250,6 @@ class _SwipePageState extends State<SwipePage> {
                             ],
                           ),
                         );
-                      },
-                      totalNum: _matches!.length,
-                      allowVerticalMovement: false,
-                      orientation: AmassOrientation.bottom,
-                      stackNum: 3,
-                      swipeEdge: 4.0,
-                      swipeUp: true,
-                      maxWidth: MediaQuery.of(context).size.width * 0.85,
-                      maxHeight: MediaQuery.of(context).size.height * 0.9,
-                      minWidth: MediaQuery.of(context).size.width * 0.8,
-                      minHeight: MediaQuery.of(context).size.width * 0.5,
-                      swipeCompleteCallback: (orientation, index) async {
-                        if (orientation == CardSwipeOrientation.right) {
-                          final _userRef = FirebaseFirestore.instance
-                              .collection('users')
-                              .doc(FirebaseAuth.instance.currentUser!.uid);
-                          await _userRef.update({
-                            'matches':
-                                FieldValue.arrayUnion([_matches![index].id]),
-                          });
-                        }
-                        if (orientation != CardSwipeOrientation.recover) {
-                          setState(() {
-                            _matches = _matches!
-                                .where((e) => e.id != _matches![index].id)
-                                .toList();
-                          });
-                        }
                       },
                     ),
                   ),

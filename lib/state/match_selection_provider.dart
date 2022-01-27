@@ -1,75 +1,86 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:diaspora_app/constants/match.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class MatchSelectionNotifier extends ChangeNotifier {
-  Set<int?> _selectedIndexes = {};
-  List<Match>? _matches;
-  Set<int?> get selectedIndexes => _selectedIndexes;
-  set matches(List<Match> matches) {
-    _matches = matches;
-  }
+  Set<String?> _selectedIds = {};
+  Set<String?> get selectedIds => _selectedIds;
+  bool changed = false;
 
-  void setSelectionIndexes(Set<int?> newSelectionIndexes) {
-    _selectedIndexes = newSelectionIndexes;
+  void setSelectedIds(Set<String?> newSelectedIds) {
+    _selectedIds = newSelectedIds;
     notifyListeners();
   }
 
-  void addIndex(int index) {
-    _selectedIndexes.add(index);
+  void addId(String id) {
+    _selectedIds.add(id);
     notifyListeners();
   }
 
-  void addOrRemove(int index, [bool? shouldAddIndex]) {
-    debugPrint("shouldAddIndex.toString()");
-    if (shouldAddIndex == null) {
-      final _indexExists = _selectedIndexes.contains(index);
-      if (_indexExists) {
-        _selectedIndexes.remove(index);
+  void addOrRemove(String id, [bool? shouldAdd]) {
+    if (shouldAdd == null) {
+      final _idExists = _selectedIds.contains(id);
+      if (_idExists) {
+        _selectedIds.remove(id);
       } else {
-        _selectedIndexes.add(index);
+        _selectedIds.add(id);
       }
     } else {
-      if (shouldAddIndex) {
-        _selectedIndexes.add(index);
+      if (shouldAdd) {
+        _selectedIds.add(id);
       } else {
-        _selectedIndexes.remove(index);
+        _selectedIds.remove(id);
       }
     }
     notifyListeners();
   }
 
-  void removeIndex(int index) {
-    _selectedIndexes.remove(index);
+  void removeId(String id) {
+    _selectedIds.remove(id);
     notifyListeners();
   }
 
-  void removeIndexes() {
-    _selectedIndexes.clear();
+  void removeIds() {
+    _selectedIds.clear();
     notifyListeners();
   }
 
   Future<void> deleteMatches() async {
-    if (_selectedIndexes.isEmpty || _matches == null || _matches!.isEmpty) {
+    if (_selectedIds.isEmpty) {
       return;
     }
     final _userRef = FirebaseFirestore.instance
         .collection('users')
         .doc(FirebaseAuth.instance.currentUser!.uid);
-    await _userRef.update({
-      'matches': FieldValue.arrayRemove(_matches!.map((e) => e.id).toList())
-    });
-    _selectedIndexes.clear();
-    _matches?.clear();
+    final _messagesRef = FirebaseFirestore.instance.collection('messages');
+    final _receivedMessages = await _messagesRef
+        .where('receiverId', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+        .get();
+    final _sentMessages = await _messagesRef
+        .where('senderId', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+        .get();
+    await _userRef
+        .update({'matches': FieldValue.arrayRemove(_selectedIds.toList())});
+    for (final _receivedMessage in _receivedMessages.docs) {
+      if (_selectedIds.contains(_receivedMessage.get('senderId'))) {
+        await _messagesRef.doc(_receivedMessage.id).delete();
+      }
+    }
+    for (final _sentMessage in _sentMessages.docs) {
+      if (_selectedIds.contains(_sentMessage.get('receiverId'))) {
+        await _messagesRef.doc(_sentMessage.id).delete();
+      }
+    }
+    _selectedIds.clear();
+    changed = true;
     notifyListeners();
   }
 
   bool selectionMode() {
-    return _selectedIndexes.isNotEmpty;
+    return _selectedIds.isNotEmpty;
   }
 
-  bool contains(int index) {
-    return _selectedIndexes.contains(index);
+  bool contains(String id) {
+    return _selectedIds.contains(id);
   }
 }
