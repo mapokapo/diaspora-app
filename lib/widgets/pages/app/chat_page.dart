@@ -54,6 +54,19 @@ class _ChatPageState extends State<ChatPage> {
         _currentUser = value;
       });
     });
+    final _messagesCountRef = FirebaseFirestore.instance
+        .collection('messagesCount')
+        .doc(FirebaseAuth.instance.currentUser!.uid);
+    _messagesCountRef.get().then((_messagesCountDoc) {
+      if (_messagesCountDoc.exists) {
+        final _data = _messagesCountDoc.data()!;
+        if (_data.containsKey(_match.id)) {
+          Map<String, Object?> _newData = {};
+          _newData[_match.id] = FieldValue.delete();
+          _messagesCountRef.update(_newData);
+        }
+      }
+    });
   }
 
   @override

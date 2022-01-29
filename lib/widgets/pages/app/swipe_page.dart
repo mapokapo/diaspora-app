@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:diaspora_app/constants/match.dart';
 import 'package:diaspora_app/constants/user_interests.dart';
+import 'package:diaspora_app/widgets/pages/app/profile_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tindercard/flutter_tindercard.dart';
@@ -58,7 +59,7 @@ class _SwipePageState extends State<SwipePage> {
 
     List<Match> _newMatches = [];
     for (final s in _matches) {
-      final _match = await Match.fromQuery(s);
+      final _match = await Match.fromQuery(s, false);
       _newMatches.add(_match);
     }
 
@@ -168,117 +169,170 @@ class _SwipePageState extends State<SwipePage> {
                         }
                       },
                       cardBuilder: (context, index) {
-                        return Material(
-                          borderRadius:
-                              const BorderRadius.all(Radius.circular(24)),
-                          clipBehavior: Clip.hardEdge,
-                          elevation: 4,
-                          color: Theme.of(context).colorScheme.primary,
-                          child: Stack(
-                            fit: StackFit.expand,
-                            alignment: Alignment.center,
-                            children: [
-                              _matches![index].imageData != null
-                                  ? Padding(
-                                      padding: EdgeInsets.all(
-                                          _matches![index].googleUser
-                                              ? 48.0
-                                              : 0),
-                                      child: Image.memory(
-                                        _matches![index].imageData!,
-                                        fit: _matches![index].googleUser
-                                            ? BoxFit.contain
-                                            : BoxFit.fitHeight,
-                                      ),
-                                    )
-                                  : Image.asset('assets/images/profile.png'),
-                              Align(
-                                alignment: Alignment.centerLeft,
-                                child: Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(horizontal: 8),
-                                  child: Icon(
-                                    Icons.delete,
-                                    color:
-                                        Theme.of(context).colorScheme.secondary,
-                                    size: 32,
-                                  ),
-                                ),
-                              ),
-                              Align(
-                                alignment: Alignment.centerRight,
-                                child: Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(horizontal: 8),
-                                  child: Icon(
-                                    Icons.favorite,
-                                    color:
-                                        Theme.of(context).colorScheme.secondary,
-                                    size: 32,
-                                  ),
-                                ),
-                              ),
-                              Positioned.fill(
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: [
-                                        Theme.of(context)
-                                            .colorScheme
-                                            .primaryVariant,
-                                        Colors.transparent,
-                                        Colors.transparent,
-                                        Colors.transparent,
-                                      ],
-                                      begin: Alignment.bottomCenter,
-                                      end: Alignment.topCenter,
+                        return GestureDetector(
+                          onTap: () {
+                            Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) {
+                                return ProfilePage(match: _matches![index]);
+                              },
+                            ));
+                          },
+                          child: Material(
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(24)),
+                            clipBehavior: Clip.hardEdge,
+                            elevation: 4,
+                            color: Theme.of(context).colorScheme.primary,
+                            child: Stack(
+                              fit: StackFit.expand,
+                              alignment: Alignment.center,
+                              children: [
+                                _matches![index].imageData != null
+                                    ? Padding(
+                                        padding: EdgeInsets.all(
+                                            _matches![index].googleUser
+                                                ? 48.0
+                                                : 0),
+                                        child: Image.memory(
+                                          _matches![index].imageData!,
+                                          fit: _matches![index].googleUser
+                                              ? BoxFit.contain
+                                              : BoxFit.fitHeight,
+                                        ),
+                                      )
+                                    : Image.asset('assets/images/profile.png'),
+                                Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 8),
+                                    child: Icon(
+                                      Icons.delete,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .secondary,
+                                      size: 32,
                                     ),
                                   ),
+                                ),
+                                Align(
+                                  alignment: Alignment.centerRight,
                                   child: Padding(
-                                    padding: const EdgeInsets.all(16.0),
-                                    child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.end,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          _matches![index].name,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .headline3!
-                                              .copyWith(
-                                                color: Colors.white,
-                                              ),
-                                        ),
-                                        Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 2),
-                                          child: Text(
-                                            (AppLocalizations.of(context)!
-                                                    .interests +
-                                                ": " +
-                                                _matches![index]
-                                                    .interests
-                                                    .map((e) =>
-                                                        getUserInterestLocalizedString(
-                                                            context, e))
-                                                    .join(", ")),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 8),
+                                    child: Icon(
+                                      Icons.favorite,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .secondary,
+                                      size: 32,
+                                    ),
+                                  ),
+                                ),
+                                Positioned.fill(
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        colors: [
+                                          Theme.of(context)
+                                              .colorScheme
+                                              .primaryVariant,
+                                          Colors.transparent,
+                                          Colors.transparent,
+                                          Colors.transparent,
+                                        ],
+                                        begin: Alignment.bottomCenter,
+                                        end: Alignment.topCenter,
+                                      ),
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(16.0),
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            _matches![index].name +
+                                                ", " +
+                                                (DateTime.now()
+                                                            .difference(
+                                                                _matches![index]
+                                                                    .dateOfBirth)
+                                                            .inDays /
+                                                        365)
+                                                    .floor()
+                                                    .toString(),
                                             style: Theme.of(context)
                                                 .textTheme
-                                                .bodyText1!
+                                                .headline5!
                                                 .copyWith(
                                                   color: Colors.white,
                                                 ),
-                                            softWrap: true,
-                                            overflow: TextOverflow.ellipsis,
                                           ),
-                                        ),
-                                      ],
+                                          Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 2),
+                                            child: Text(
+                                              (AppLocalizations.of(context)!
+                                                      .interests +
+                                                  ": " +
+                                                  _matches![index]
+                                                      .interests
+                                                      .map((e) =>
+                                                          getUserInterestLocalizedString(
+                                                              context, e))
+                                                      .join(", ")),
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .bodyText1!
+                                                  .copyWith(
+                                                    color: Colors.white,
+                                                  ),
+                                              maxLines: 2,
+                                            ),
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 2),
+                                            child: Text(
+                                              (AppLocalizations.of(context)!
+                                                      .sign +
+                                                  ": " +
+                                                  _matches![index]
+                                                      .getLocalizedHoroscope(
+                                                          context)),
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .bodyText2!
+                                                  .copyWith(
+                                                    color: Colors.white,
+                                                  ),
+                                            ),
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 2),
+                                            child: Text(
+                                              AppLocalizations.of(context)!
+                                                      .clickForMore +
+                                                  "...",
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .bodyText2!
+                                                  .copyWith(
+                                                    color: Colors.white,
+                                                  ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         );
                       },

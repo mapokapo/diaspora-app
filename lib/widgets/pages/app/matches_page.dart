@@ -227,12 +227,43 @@ class _MatchesPageState extends State<MatchesPage> {
                                             .toList(),
                                       ],
                                     ),
-                                    trailing:
-                                        Provider.of<MatchSelectionNotifier>(
-                                                    context)
-                                                .selectionMode()
-                                            ? const Icon(Icons.chevron_right)
-                                            : null,
+                                    trailing: Provider.of<
+                                                MatchSelectionNotifier>(context)
+                                            .selectionMode()
+                                        ? null
+                                        : Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              if (_matches![index]
+                                                      .messageCount >
+                                                  0)
+                                                Container(
+                                                  decoration: BoxDecoration(
+                                                    shape: BoxShape.circle,
+                                                    color: Theme.of(context)
+                                                        .colorScheme
+                                                        .primary,
+                                                  ),
+                                                  child: Padding(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            8.0),
+                                                    child: Text(
+                                                      _matches![index]
+                                                          .messageCount
+                                                          .toString(),
+                                                      style: Theme.of(context)
+                                                          .textTheme
+                                                          .bodyText2!
+                                                          .copyWith(
+                                                            color: Colors.black,
+                                                          ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              const Icon(Icons.chevron_right),
+                                            ],
+                                          ),
                                   ),
                                 ],
                               );

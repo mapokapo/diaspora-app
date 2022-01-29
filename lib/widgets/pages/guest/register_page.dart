@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -30,6 +29,8 @@ class _RegisterPageState extends State<RegisterPage> {
   Future<void> _handleRegister(Uint8List? imageData, String name, String? email,
       String? password, DateTime dateOfBirth, List<String> interests,
       [String? uid, String? imageUrl]) async {
+    // TODO
+    // add gender
     try {
       User? user;
       if (email != null && password != null) {
@@ -52,17 +53,17 @@ class _RegisterPageState extends State<RegisterPage> {
         final ref = FirebaseStorage.instance
             .ref("profile_images")
             .child(user != null ? user.uid : uid!);
-        UploadTask uploadTask = ref.putFile(File.fromRawPath(imageData));
+        UploadTask uploadTask = ref.putData(imageData);
         setState(() {
           _uploading = true;
         });
         uploadTask.whenComplete(() async {
-          context.vRouter.to("/app", isReplacement: true, historyState: {});
           await FirebaseMessaging.instance.requestPermission();
+          context.vRouter.to("/app", isReplacement: true, historyState: {});
         });
       } else {
-        context.vRouter.to("/app", isReplacement: true, historyState: {});
         await FirebaseMessaging.instance.requestPermission();
+        context.vRouter.to("/app", isReplacement: true, historyState: {});
       }
     } on FirebaseAuthException catch (e) {
       final code = e.code.split("/").last;

@@ -35,6 +35,10 @@ class Option<T> {
         return AppLocalizations.of(context)!.change +
             " " +
             AppLocalizations.of(context)!.profileImage.toLowerCase();
+      case 'bio':
+        return AppLocalizations.of(context)!.change +
+            " " +
+            AppLocalizations.of(context)!.bio.toLowerCase();
       case 'name':
         return AppLocalizations.of(context)!.change +
             " " +

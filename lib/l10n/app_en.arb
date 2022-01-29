@@ -95,7 +95,7 @@
   "@yourInterests": {
     "description": "Your interests string."
   },
-  "fieldRequiredYour": "You must enter your {fieldName, select, email{email}, name{name}, password{password}, dateOfBirth{date of birth}}.",
+  "fieldRequiredYour": "You must enter your {fieldName, select, email{email}, name{name}, password{password}, dateOfBirth{date of birth}, bio{bio}}.",
   "@fieldRequiredYour": {
     "description": "Login field requirement error string with your.",
     "placeholders": {
@@ -106,7 +106,7 @@
       }
     }
   },
-  "fieldRequired": "You must write {fieldName, select, email{an email}, name{a name}, password{a password}, content{some content}}.",
+  "fieldRequired": "You must write {fieldName, select, email{an email}, name{a name}, password{a password}, content{some content}, bio{a bio}}.",
   "@fieldRequired": {
     "description": "Login field requirement error string.",
     "placeholders": {
@@ -370,5 +370,65 @@
   "error": "Unknown error occured.",
   "@error": {
     "description": "Unknown error string."
+  },
+  "sign": "Sign",
+  "@sign": {
+    "description": "Astrological sign string."
+  },
+  "aquarius": "Aquarius",
+  "@aquarius": {
+    "description": "Astrological sign Aquarius string."
+  },
+  "pisces": "Pisces",
+  "@pisces": {
+    "description": "Astrological sign Pisces string."
+  },
+  "aries": "Aries",
+  "@aries": {
+    "description": "Astrological sign Aries string."
+  },
+  "taurus": "Taurus",
+  "@taurus": {
+    "description": "Astrological sign Taurus string."
+  },
+  "gemini": "Gemini",
+  "@gemini": {
+    "description": "Astrological sign Gemini string."
+  },
+  "cancer": "Cancer",
+  "@cancer": {
+    "description": "Astrological sign Cancer string."
+  },
+  "leo": "Leo",
+  "@leo": {
+    "description": "Astrological sign Leo string."
+  },
+  "virgo": "Virgo",
+  "@virgo": {
+    "description": "Astrological sign Virgo string."
+  },
+  "libra": "Libra",
+  "@libra": {
+    "description": "Astrological sign Libra string."
+  },
+  "scorpio": "Scorpio",
+  "@scorpio": {
+    "description": "Astrological sign Scorpio string."
+  },
+  "sagittarius": "Sagittarius",
+  "@sagittarius": {
+    "description": "Astrological sign Sagittarius string."
+  },
+  "capricorn": "Capricorn",
+  "@capricorn": {
+    "description": "Astrological sign Capricorn string."
+  },
+  "clickForMore": "Click for more",
+  "@clickForMore": {
+    "description": "Click for more string."
+  },
+  "bio": "Bio",
+  "@bio": {
+    "description": "User bio string."
   }
 }

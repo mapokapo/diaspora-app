@@ -38,4 +38,16 @@ export const sendNotification = functions.region("europe-west3").firestore
           },
         });
       }
+      const messagesCountRef = admin.firestore().collection("messagesCount").doc(receiverId);
+      const messageCountDoc = await messagesCountRef.get();
+      if (messageCountDoc.exists) {
+        const prevCount = parseInt(messageCountDoc.get(senderId));
+        await messagesCountRef.update({
+          [senderId]: prevCount + 1,
+        });
+      } else {
+        await messagesCountRef.create({
+          [senderId]: 1,
+        });
+      }
     });
