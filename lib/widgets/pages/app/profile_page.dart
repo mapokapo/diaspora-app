@@ -54,11 +54,13 @@ class _ProfilePageState extends State<ProfilePage> {
       Option<List<String>>(
           name: 'interests', value: List<String>.from(user.get('interests'))),
     ];
-    setState(() {
-      _imageData = imageData;
-      _currentUser = user;
-      _options = options;
-    });
+    if (mounted) {
+      setState(() {
+        _imageData = imageData;
+        _currentUser = user;
+        _options = options;
+      });
+    }
   }
 
   @override
@@ -137,21 +139,24 @@ class _ProfilePageState extends State<ProfilePage> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Flexible(
-                                child: Text(
-                                  _match != null
-                                      ? _match!.name
-                                      : _currentUser!.get('name'),
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .headline4!
-                                      .copyWith(
-                                        fontWeight: FontWeight.bold,
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .primary,
-                                      ),
-                                  textAlign: TextAlign.center,
-                                  overflow: TextOverflow.fade,
+                                child: Padding(
+                                  padding: const EdgeInsets.only(left: 4),
+                                  child: Text(
+                                    _match != null
+                                        ? _match!.name
+                                        : _currentUser!.get('name'),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .headline4!
+                                        .copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary,
+                                        ),
+                                    textAlign: TextAlign.center,
+                                    overflow: TextOverflow.fade,
+                                  ),
                                 ),
                               ),
                               Text(
@@ -183,6 +188,27 @@ class _ProfilePageState extends State<ProfilePage> {
                                       List<String>.from(
                                               _currentUser!.get('matches'))
                                           .length),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyText2!
+                                      .copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .secondary,
+                                      ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              if (_match == null)
+                                Text(
+                                  AppLocalizations.of(context)!.sign +
+                                      ": " +
+                                      Match.getLocalizedHoroscopeFrom(
+                                        (_currentUser!.get('dateOfBirth')
+                                                as Timestamp)
+                                            .toDate(),
+                                        context,
+                                      ),
                                   style: Theme.of(context)
                                       .textTheme
                                       .bodyText2!

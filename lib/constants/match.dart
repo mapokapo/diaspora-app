@@ -30,7 +30,10 @@ class Match {
     this.messageCount = 0,
   });
 
-  String getLocalizedHoroscope(BuildContext context) {
+  static String getLocalizedHoroscopeFrom(
+    DateTime dateOfBirth,
+    BuildContext context,
+  ) {
     final days = [21, 20, 21, 21, 22, 22, 23, 24, 24, 24, 23, 22];
     final signs = {
       "aquarius",
@@ -68,6 +71,10 @@ class Match {
       month--;
     }
     return signLocalizationMap[signs.elementAt(month)]!;
+  }
+
+  String getLocalizedHoroscope(BuildContext context) {
+    return Match.getLocalizedHoroscopeFrom(dateOfBirth, context);
   }
 
   static Future<Match> fromDoc(DocumentSnapshot<Map<String, dynamic>> snapshot,

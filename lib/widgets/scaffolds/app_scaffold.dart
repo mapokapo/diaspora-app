@@ -1,20 +1,26 @@
+import 'dart:async';
+
 import 'package:diaspora_app/constants/match.dart';
 import 'package:diaspora_app/state/current_match_notifier.dart';
 import 'package:diaspora_app/state/language_notifier.dart';
 import 'package:diaspora_app/state/match_selection_provider.dart';
 import 'package:diaspora_app/state/theme_mode_notifier.dart';
+import 'package:diaspora_app/widgets/pages/app/profile_page.dart';
 import 'package:diaspora_app/widgets/partials/user_avatar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:vrouter/vrouter.dart';
 
 class AppScaffold extends StatefulWidget {
   final Widget body;
+  final bool tabNavigation;
 
-  const AppScaffold({required this.body, Key? key}) : super(key: key);
+  const AppScaffold({required this.body, this.tabNavigation = true, Key? key})
+      : super(key: key);
 
   @override
   _AppScaffoldState createState() => _AppScaffoldState();
@@ -28,26 +34,35 @@ class _AppScaffoldState extends State<AppScaffold> {
     context.vRouter.to(_routes[index], isReplacement: true);
   }
 
-  @override
-  void initState() {
-    super.initState();
-    FirebaseMessaging.instance
-        .getInitialMessage()
-        .then((_initialMessage) async {
-      if (_initialMessage != null &&
-          _initialMessage.data.containsKey('senderId')) {
-        final _match = await Match.fromId(_initialMessage.data['senderId']);
-        Provider.of<CurrentMatchNotifier>(context, listen: false)
-            .setMatch(_match);
-        context.vRouter.to('chat');
-      }
-    });
-    FirebaseMessaging.onMessageOpenedApp.listen((message) async {
+  FutureOr<dynamic> _handleNotification(RemoteMessage? message) async {
+    if (message == null) return;
+    if (message.data.containsKey('senderId')) {
       final _match = await Match.fromId(message.data['senderId']);
       Provider.of<CurrentMatchNotifier>(context, listen: false)
           .setMatch(_match);
       context.vRouter.to('chat');
-    });
+    } else if (message.data.containsKey('matchedUserId')) {
+      final _match = await Match.fromId(message.data['matchedUserId']);
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (context) {
+          return AppScaffold(
+            tabNavigation: false,
+            body: ProfilePage(
+              match: _match,
+            ),
+          );
+        }),
+      );
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    if (FirebaseAuth.instance.currentUser != null) {
+      FirebaseMessaging.instance.getInitialMessage().then(_handleNotification);
+      FirebaseMessaging.onMessageOpenedApp.listen(_handleNotification);
+    }
   }
 
   @override
@@ -125,11 +140,17 @@ class _AppScaffoldState extends State<AppScaffold> {
             ],
           ),
         ),
-        appBar: Provider.of<CurrentMatchNotifier>(context).match == null
+        appBar: !widget.tabNavigation
             ? AppBar(
-                title: Text(AppLocalizations.of(context)!.appName),
-                leading:
-                    Provider.of<MatchSelectionNotifier>(context).selectionMode()
+                leading: const BackButton(),
+                title: Text(
+                    Provider.of<CurrentMatchNotifier>(context).match!.name),
+              )
+            : Provider.of<CurrentMatchNotifier>(context).match == null
+                ? AppBar(
+                    title: Text(AppLocalizations.of(context)!.appName),
+                    leading: Provider.of<MatchSelectionNotifier>(context)
+                            .selectionMode()
                         ? IconButton(
                             onPressed: () {
                               Provider.of<MatchSelectionNotifier>(context,
@@ -144,42 +165,62 @@ class _AppScaffoldState extends State<AppScaffold> {
                               _scaffoldKey.currentState!.openDrawer();
                             },
                           ),
-                actions: Provider.of<MatchSelectionNotifier>(context)
-                        .selectionMode()
-                    ? [
-                        IconButton(
-                          onPressed: () async {
-                            await Provider.of<MatchSelectionNotifier>(context,
-                                    listen: false)
-                                .deleteMatches();
-                          },
-                          icon: const Icon(Icons.delete),
-                        ),
-                      ]
-                    : null,
-              )
-            : AppBar(
-                title: Text(
-                    Provider.of<CurrentMatchNotifier>(context).match!.name),
-                leadingWidth: 80,
-                titleSpacing: 4,
-                leading: InkWell(
-                  onTap: () {
-                    context.vRouter.systemPop();
-                  },
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.chevron_left),
-                      UserAvatar(
-                          Provider.of<CurrentMatchNotifier>(context)
+                    actions: Provider.of<MatchSelectionNotifier>(context)
+                            .selectionMode()
+                        ? [
+                            IconButton(
+                              onPressed: () async {
+                                await Provider.of<MatchSelectionNotifier>(
+                                        context,
+                                        listen: false)
+                                    .deleteMatches();
+                              },
+                              icon: const Icon(Icons.delete),
+                            ),
+                          ]
+                        : null,
+                  )
+                : AppBar(
+                    centerTitle: true,
+                    title: GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(builder: (context) {
+                            return AppScaffold(
+                              tabNavigation: false,
+                              body: ProfilePage(
+                                match:
+                                    Provider.of<CurrentMatchNotifier>(context)
+                                        .match!,
+                              ),
+                            );
+                          }),
+                        );
+                      },
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          UserAvatar(
+                              Provider.of<CurrentMatchNotifier>(context)
+                                  .match!
+                                  .imageData,
+                              mini: true),
+                          const SizedBox(width: 8),
+                          Text(Provider.of<CurrentMatchNotifier>(context)
                               .match!
-                              .imageData,
-                          mini: true),
-                    ],
+                              .name),
+                        ],
+                      ),
+                    ),
+                    leadingWidth: 40,
+                    titleSpacing: 4,
+                    leading: IconButton(
+                      onPressed: () {
+                        context.vRouter.systemPop();
+                      },
+                      icon: const Icon(Icons.chevron_left),
+                    ),
                   ),
-                ),
-              ),
         bottomNavigationBar:
             Provider.of<CurrentMatchNotifier>(context).match == null
                 ? BottomNavigationBar(

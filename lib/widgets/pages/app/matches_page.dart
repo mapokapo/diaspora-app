@@ -75,16 +75,18 @@ class _MatchesPageState extends State<MatchesPage> {
         .doc(FirebaseAuth.instance.currentUser!.uid)
         .get();
     final _m = await _getMatches(page);
-    setState(() {
-      if (_matches == null ||
-          (firstRun &&
-              !_m.any((e) => _matches!.map((s) => s.id).contains(e.id)))) {
-        _matches = _matches != null ? (_matches! + _m) : _m;
-      } else {
-        _noMatches = true;
-      }
-      _currentUser = _user;
-    });
+    if (mounted) {
+      setState(() {
+        if (_matches == null ||
+            (firstRun &&
+                !_m.any((e) => _matches!.map((s) => s.id).contains(e.id)))) {
+          _matches = _matches != null ? (_matches! + _m) : _m;
+        } else {
+          _noMatches = true;
+        }
+        _currentUser = _user;
+      });
+    }
   }
 
   @override

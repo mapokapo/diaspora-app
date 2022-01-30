@@ -44,9 +44,9 @@ void main() async {
 
     final _user = await _userRef.get();
     if (_user.exists) {
-      final _deviceTokenExists = _user.data()!.keys.contains('deviceToken');
-      if (!_deviceTokenExists) {
-        final _token = await FirebaseMessaging.instance.getToken();
+      final _token = await FirebaseMessaging.instance.getToken();
+      if (!_user.data()!.keys.contains('deviceToken') ||
+          _user.get('deviceToken') != _token) {
         await _userRef.update({
           'deviceToken': _token,
         });
@@ -97,11 +97,13 @@ class MyApp extends StatelessWidget {
               Provider.of<MatchSelectionNotifier>(context, listen: false)
                   .removeIds();
             } else {
-              if (redirector.historyCanBack()) redirector.historyBack();
+              if (redirector.historyCanBack()) {
+                redirector.historyBack();
+              }
             }
           },
           afterEnter: (context, from, to) {
-            if (from == "/app/matches/chat") {
+            if (from == "/app/matches/chat" && to == "/app/matches") {
               Provider.of<CurrentMatchNotifier>(context, listen: false)
                   .setMatch(null);
             }

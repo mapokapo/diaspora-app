@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:diaspora_app/constants/match.dart';
 import 'package:diaspora_app/constants/user_interests.dart';
 import 'package:diaspora_app/widgets/pages/app/profile_page.dart';
+import 'package:diaspora_app/widgets/scaffolds/app_scaffold.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tindercard/flutter_tindercard.dart';
@@ -173,7 +174,10 @@ class _SwipePageState extends State<SwipePage> {
                           onTap: () {
                             Navigator.of(context).push(MaterialPageRoute(
                               builder: (context) {
-                                return ProfilePage(match: _matches![index]);
+                                return AppScaffold(
+                                  body: ProfilePage(match: _matches![index]),
+                                  tabNavigation: false,
+                                );
                               },
                             ));
                           },
