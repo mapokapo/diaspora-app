@@ -140,7 +140,8 @@ class _AppScaffoldState extends State<AppScaffold> {
             ],
           ),
         ),
-        appBar: !widget.tabNavigation
+        appBar: !widget.tabNavigation &&
+                Provider.of<CurrentMatchNotifier>(context).match != null
             ? AppBar(
                 leading: const BackButton(),
                 title: Text(

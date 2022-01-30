@@ -174,10 +174,7 @@ class _SwipePageState extends State<SwipePage> {
                           onTap: () {
                             Navigator.of(context).push(MaterialPageRoute(
                               builder: (context) {
-                                return AppScaffold(
-                                  body: ProfilePage(match: _matches![index]),
-                                  tabNavigation: false,
-                                );
+                                return ProfilePage(match: _matches![index]);
                               },
                             ));
                           },

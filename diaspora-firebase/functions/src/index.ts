@@ -8,32 +8,31 @@ admin.initializeApp({
     "https://diaspora-app-9ffb9-default-rtdb.europe-west1.firebasedatabase.app",
 });
 
-export const sendMatchNotification = functions.region("europe-west3").firestore.document("users/{userId}").onUpdate(async (change, context) => {
-  const newMatches: string[] | undefined = change.after.get("matches");
-  const oldMatches: string[] | undefined = change.before.get("matches");
-  if (newMatches !== undefined && oldMatches !== undefined) {
-    if (newMatches.length === oldMatches.length + 1) {
-      // The user that matched somebody
-      const {name} = change.after.data();
-      if (!name) return;
-      const newMatch = newMatches.filter((match) => !oldMatches.includes(match))[0];
-      // The user that got matched by somebody
-      const matchedUserDoc = await admin.firestore().collection("users").doc(newMatch).get();
-      if (!matchedUserDoc.exists) return;
-      const matchedUserToken = matchedUserDoc.get("deviceToken");
-      if (!matchedUserToken) return;
-      admin.messaging().sendToDevice(matchedUserToken, {
-        notification: {
-          body: `Diaspora +${name}`,
-          color: "#A5D6A7",
-          title: name,
-          tag: matchedUserDoc.id,
-        },
-        data: {
-          matchedUserId: matchedUserDoc.id,
-        },
-      });
-    }
+export const sendMatchNotification = functions.region("europe-west3").firestore.document("users/{userId}").onUpdate(async (change) => {
+  const newMatches: string[] = change.after.get("matches");
+  const oldMatches: string[] = change.before.get("matches");
+  // If the field that changed is matches AND if the action was addition
+  const newLen: number = newMatches?.length as number;
+  const oldLen: number = oldMatches?.length as number;
+  if (newLen - 1 === oldLen) {
+    // The user that matched somebody
+    const userName = change.after.get("name");
+    const newMatch = newMatches.filter((match) => !oldMatches.includes(match))[0];
+    // The user that got matched by somebody
+    const matchedUserDoc = await admin.firestore().collection("users").doc(newMatch).get();
+    const matchedUserToken = matchedUserDoc.get("deviceToken");
+    if (!matchedUserToken) return;
+    admin.messaging().sendToDevice(matchedUserToken, {
+      notification: {
+        body: `Diaspora +${userName}`,
+        color: "#A5D6A7",
+        title: userName,
+        tag: matchedUserDoc.id,
+      },
+      data: {
+        matchedUserId: matchedUserDoc.id,
+      },
+    });
   }
 });
 
