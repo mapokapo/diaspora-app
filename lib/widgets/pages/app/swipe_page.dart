@@ -44,7 +44,7 @@ class _SwipePageState extends State<SwipePage> {
             !List<String>.from(currentUser.get('matches')).contains(e.id))
         .toList();
     // Not enough matches - get random users instead
-    if (_matches.length < 20) {
+    if (_matches.length < 10) {
       // add every matched user's id, the current user's id, and every user id the current user has ever matched with
       final _filterMatchIds = _matches.map((e) => e.id).toList()
         ..add(FirebaseAuth.instance.currentUser!.uid);
