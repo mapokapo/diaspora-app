@@ -31,9 +31,9 @@ class _SwipePageState extends State<SwipePage> {
     final _matches = (await usersCollection
             .where(
               'dateOfBirth',
-              isGreaterThan: Timestamp.fromDate(
+              isGreaterThanOrEqualTo: Timestamp.fromDate(
                   currentUserDoB.subtract(const Duration(days: 365 * 2))),
-              isLessThan: Timestamp.fromDate(
+              isLessThanOrEqualTo: Timestamp.fromDate(
                   currentUserDoB.add(const Duration(days: 365 * 2))),
             )
             .where('interests', arrayContainsAny: currentUser.get('interests'))
@@ -44,17 +44,17 @@ class _SwipePageState extends State<SwipePage> {
             !List<String>.from(currentUser.get('matches')).contains(e.id))
         .toList();
     // Not enough matches - get random users instead
-    if (_matches.length < 10) {
+    if (_matches.length < 20) {
       // add every matched user's id, the current user's id, and every user id the current user has ever matched with
       final _filterMatchIds = _matches.map((e) => e.id).toList()
-        ..add(FirebaseAuth.instance.currentUser!.uid)
-        ..addAll(List<String>.from(currentUser.get('matches')));
+        ..add(FirebaseAuth.instance.currentUser!.uid);
       // then get extra matches which are NOT in matchIds - this guarantees novel matches for the current user
       final extraMatches = (await usersCollection
               .where(FieldPath.documentId, whereNotIn: _filterMatchIds)
-              .limit(10 - _matches.length)
               .get())
-          .docs;
+          .docs
+          .where((e) =>
+              !List<String>.from(currentUser.get('matches')).contains(e.id));
       _matches.addAll(extraMatches);
     }
 
