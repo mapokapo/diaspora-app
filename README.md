@@ -43,8 +43,6 @@
 
 ## About The Project
 
-[![Diaspora Screen Shot][product-screenshot]](https://github.com/mapokapo/diaspora-app)
-
 Diaspora is a casual social media app made to meet new people and friends. It is heavily inpsired by Tinder with its characteristic "swipe-match" system.
 The app is a great way for introverted or antisocial people to get friends, be it online or in person.
 It is made to be friendly and accessible to as many people as possible, and to ensure a comfortable experience.
@@ -86,4 +84,3 @@ Project Link: [https://github.com/mapokapo/diaspora-app](https://github.com/mapo
 [issues-url]: https://github.com/mapokapo/diaspora-app/issues
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/leo-petrović-7047b1162
-[product-screenshot]: https://github.com/mapokapo/diaspora-app/blob/master/screenshots/screenshot1.png
